@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" ng-app>
+
+<head>
+  <title>CannonAide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="source/lib//three.js"></script>
+  <script type="text/javascript" src="source/lib//OBJLoader.js"></script>
+  <script type="text/javascript" src="source/lib//Array.Prototype.Find.js"></script>
+  <script type="text/javascript" src="source/renderer.js"></script>
+</head>
+
+<body>
+  <div id="container">
+    <canvas id="viewport">
+    </canvas>
+  </div>
+  <script>
+  
+    var humanoid;
+    
+    init();
+    
+    function init() {
+      window.engine.Renderer.Init( document.getElementById("viewport") );
+      window.engine.Renderer.Load();
+      window.engine.Renderer.onLoad = function(){
+        humanoid = window.engine.Renderer.CreateRenderObject("humanoid");
+        for( var meshItr in humanoid.meshes ) {
+          var currMesh = humanoid.meshes[meshItr];
+          currMesh.scale.set( 64, 64, 64 );
+				  currMesh.rotation.y = 90;
+        }
+        
+        animate();
+      };  
+    }
+    
+    function animate() {
+
+        requestAnimationFrame( animate );
+
+        for( var meshItr in humanoid.meshes ) {
+          var currMesh = humanoid.meshes[meshItr];
+				  currMesh.rotation.y += 0.01;
+        }
+        
+        window.engine.Renderer.Render();
+    }
+
+</script>
+
+</body>
+
+</html>

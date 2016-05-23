@@ -1,0 +1,11 @@
+{
+	"objects": {
+		"humanoid": {
+			"meshes": [ {
+					"geo": "hmanoidv3.obj",
+					"tex": "Char_UV_Texture.gif" 
+				}
+			]
+		}
+	}
+}
