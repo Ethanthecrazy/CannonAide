@@ -159,9 +159,7 @@ Renderer.prototype.Render = function() {
 
 //==============================================================================
 Renderer.prototype.CreateRenderObject = function(_name) {
-    var newObject = {
-        meshes:[]
-    };
+    var newObject = new THREE.Object3D();
 
     var sourceObject = this.m_3RenderObjects[ _name ];
     if( sourceObject == null )
@@ -173,11 +171,10 @@ Renderer.prototype.CreateRenderObject = function(_name) {
         var sourceTex = this.m_3Materials[ currMesh.tex ];
 
         var newMesh = new THREE.Mesh(sourceGeo, sourceTex);
-        newMesh.customRenderObject = newObject;
-        this.m_3Scene.add(newMesh);
-        newObject.meshes.push(newMesh);
+        newObject.add(newMesh);
     }
-
+    
+    this.m_3Scene.add(newObject);
     return newObject;
 };
 

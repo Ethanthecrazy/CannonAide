@@ -28,12 +28,9 @@
       window.engine.Renderer.Load();
       window.engine.Renderer.onLoad = function(){
         humanoid = window.engine.Renderer.CreateRenderObject("humanoid");
-        for( var meshItr in humanoid.meshes ) {
-          var currMesh = humanoid.meshes[meshItr];
-          currMesh.scale.set( 64, 64, 64 );
-				  currMesh.rotation.y = 90;
-        }
-        
+        humanoid.scale.set( 64, 64, 64 );
+				humanoid.rotation.y = 90;
+
         animate();
       };  
     }
@@ -41,12 +38,8 @@
     function animate() {
 
         requestAnimationFrame( animate );
-
-        for( var meshItr in humanoid.meshes ) {
-          var currMesh = humanoid.meshes[meshItr];
-				  currMesh.rotation.y += 0.01;
-        }
-        
+				humanoid.rotation.y += 0.01;
+				
         window.engine.Renderer.Render();
     }
 
