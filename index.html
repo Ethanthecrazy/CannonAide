@@ -10,6 +10,8 @@
   <script type="text/javascript" src="source/lib//OBJLoader.js"></script>
   <script type="text/javascript" src="source/lib//Array.Prototype.Find.js"></script>
   <script type="text/javascript" src="source/renderer.js"></script>
+  <script type="text/javascript" src="source/game.manager.js"></script>
+  <script type="text/javascript" src="source/entities.js"></script>
 </head>
 
 <body>
@@ -18,31 +20,28 @@
     </canvas>
   </div>
   <script>
-  
-    var humanoid;
     
     init();
     
     function init() {
       window.engine.Renderer.Init( document.getElementById("viewport") );
-      window.engine.Renderer.Load();
+      window.engine.Renderer.Load( "resources/index.json" );
       window.engine.Renderer.onLoad = function(){
-        humanoid = window.engine.Renderer.CreateRenderObject("humanoid");
-        humanoid.scale.set( 64, 64, 64 );
-				humanoid.rotation.y = 90;
-
-        animate();
-      };  
+        
+        window.engine.GameManager.Start();
+        window.engine.GameManager.SpawnObject( "humanoid" );
+        main();
+        
+      };
     }
     
-    function animate() {
+    function main() {
 
-        requestAnimationFrame( animate );
-				humanoid.rotation.y += 0.01;
-				
+        requestAnimationFrame( main );
+				window.engine.GameManager.Update();
         window.engine.Renderer.Render();
     }
-
+    
 </script>
 
 </body>

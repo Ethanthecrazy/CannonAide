@@ -38,11 +38,18 @@ Renderer.prototype.Init = function( canvas ) {
     var setWidth = window.innerWidth;
     var setHeight = window.innerHeight;
 
-    this.m_3Camera = new THREE.PerspectiveCamera(45, 
-        setWidth /  setHeight, 
-        0.1, 
-        10000);
-    this.m_3Camera.position.z = 1000;
+    var unitsWidth = 64 * ( setWidth / setHeight );
+    var unitsHeight = 64;
+
+    this.m_3Camera = new THREE.OrthographicCamera( 
+        unitsWidth / - 2, 
+        unitsWidth / 2, 
+        unitsHeight / 2, 
+        unitsHeight / - 2, 
+        1, 
+        1000 );
+        
+    this.m_3Camera.position.z = 500;
 
     this.m_3Renderer = new THREE.WebGLRenderer({
         canvas: canvas
@@ -59,16 +66,24 @@ Renderer.prototype.Init = function( canvas ) {
 
 //==============================================================================
 Renderer.prototype.onResize = function( _nWidth, _nHeight) {
-    this.m_3Camera.aspect = _nWidth / _nHeight;
+    
+    var unitsWidth = 64 * ( _nWidth / _nHeight );
+    var unitsHeight = 64;
+    
+    this.m_3Camera.left = unitsWidth / - 2; 
+    this.m_3Camera.right = unitsWidth / 2; 
+    this.m_3Camera.top = unitsHeight / 2; 
+    this.m_3Camera.bottom = unitsHeight / - 2;
+
     this.m_3Camera.updateProjectionMatrix();
 
     this.m_3Renderer.setSize(_nWidth, _nHeight);
 };
 
 //==============================================================================
-Renderer.prototype.Load = function() {
+Renderer.prototype.Load = function( _path ) {
     var that = this;
-    $.getJSON("resources/index.json", function(_Index) {
+    $.getJSON( _path, function(_Index) {
         
         for( var objName in _Index.objects) {
             var currObj = _Index.objects[objName];
@@ -83,6 +98,11 @@ Renderer.prototype.Load = function() {
             that.m_3RenderObjects[ objName ] = currObj;
         }
     });
+};
+
+//==============================================================================
+Renderer.prototype.GetGameDimensions = function() {
+    return new THREE.Vector2( this.m_3Camera.right * 2, this.m_3Camera.top * 2 );
 };
 
 //==============================================================================
@@ -179,13 +199,8 @@ Renderer.prototype.CreateRenderObject = function(_name) {
 };
 
 //==============================================================================
-Renderer.prototype.RemoveRenderObject = function( _object ) {
-    if( _object.meshes ) {
-        for( var i = 0; i < _object.meshes.length; ++i ) {
-            var currMesh = _object.meshes[i];
-            this.m_3Scene.remove( currMesh );
-        }
-    }
+Renderer.prototype.Remove3DObject = function( _object ) {
+    this.m_3Scene.remove( _object );
 };
 
 //==============================================================================
