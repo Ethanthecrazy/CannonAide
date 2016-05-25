@@ -1,28 +1,37 @@
 /* global GameObject */
 
 window.engine.GameManager.AddObjectFunction( "humanoid", function( _d3Object ){
-    var newObj = new GameObject( _d3Object, [] );
     
-    _d3Object.rotation.y = -3.14 / 2;
+    var newObj = new GameObject( _d3Object, window.engine.GameManager.GetColliders( "humanoid" ) );
+    
     _d3Object.rotation.x = 3.14;
-    newObj.SetVelocity( 0, 0.5);
-    
-    var fpsCounter = 0;
-    var fpsTimer = 0;
     
     newObj.AddUpdateCallback( function( _fDT ) {
-       if( newObj.GetPosition().y > 35 ) {
-           newObj.SetPosition( 0, -40 );
-       }
        
-       fpsCounter++;
-       fpsTimer += _fDT;
-       if( fpsTimer > 1 ) {
-           console.log( fpsCounter );
-           fpsCounter = 0;
-           fpsTimer = 0;
-       }
     });
     
+    newObj.AddCollisionCallback( function( _otherObj ){
+
+    });
+    
+    window.addEventListener("keydown", function (e) {
+        e = e || window.event;
+        
+        switch (e.keyCode) {
+            case 37:
+                newObj.AddVelocity( -0.54321, 0 );
+                break;
+            case 38:
+                newObj.AddVelocity( 0, 0.54321 );
+                break;
+            case 39:
+                newObj.AddVelocity( 0.54321, 0 );
+                break;
+            case 40:
+                newObj.AddVelocity( 0, -0.54321 );
+                break;
+        }
+    });
+
    return newObj;
 });

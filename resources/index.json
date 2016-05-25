@@ -1,10 +1,19 @@
 {
 	"objects": {
 		"humanoid": {
-			"meshes": [ {
-					"geo": "hmanoidv3.obj",
-					"tex": "Char_UV_Texture.gif" 
-				}
+			"meshes": [ 
+				{ "geo": "hmanoidv3.obj", "tex": "Char_UV_Texture.gif" }
+			],
+			"colliders":[ 
+				{ "name": "default", "channels": [2], "left": -1.5, "right": 1.5, "top": 1.5, "bottom": -1.5 }
+			]
+		},
+		"debris": {
+			"meshes": [ 
+				{ "geo": "hmanoidv3.obj", "tex": "Char_UV_Texture.gif" }
+			],
+			"colliders":[ 
+				{ "name": "default", "channels": [2], "left": -2, "right": 2, "top": 2, "bottom": -2 }
 			]
 		}
 	}

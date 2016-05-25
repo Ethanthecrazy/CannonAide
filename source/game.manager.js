@@ -1,4 +1,5 @@
 /* global THREE */
+/* global $ */
 
 //==============================================================================
 function GameObject( _3DObject, _colliderList ) {
@@ -31,6 +32,12 @@ GameObject.prototype.SetPosition = function( _x, _y ) {
 };
 
 //==============================================================================
+GameObject.prototype.ShiftPostion = function( _x, _y ) {
+    this.m_3vCurrPos.x += _x;
+    this.m_3vCurrPos.y += _y;
+};
+
+//==============================================================================
 GameObject.prototype.GetPosition = function() {
   return this.m_3vCurrPos;  
 };
@@ -42,11 +49,18 @@ GameObject.prototype.SetVelocity = function( _x, _y ) {
 };
 
 //==============================================================================
+GameObject.prototype.AddVelocity = function( _x, _y ) {
+    var vNewVel = new THREE.Vector2( -_x, -_y );
+    this.m_3vPrevPos.addVectors( this.m_3vPrevPos, vNewVel );
+};
+
+//==============================================================================
 GameObject.prototype.Get3DObject = function() {
   return this.m_3DObject;  
 };
 
 GameObject.prototype.AddUpdateCallback = function( _callback ) {
+    
   this.m_onUpdateCallbacks.push( _callback.bind(this) );  
 };
 
@@ -73,13 +87,43 @@ GameObject.prototype.FixedUpdate = function() {
     }
 };
 
+GameObject.prototype.GetColliderCount = function() {
+    return this.m_3Colliders.length;
+};
+
+GameObject.prototype.GetCollider = function( _nIndex ) {
+    var collSource = this.m_3Colliders[_nIndex];
+    
+    var v2Min = new THREE.Vector2( collSource.left, collSource.bottom );
+    var v2Max = new THREE.Vector2( collSource.right, collSource.top );
+    v2Min.add( this.m_3vCurrPos );
+    v2Max.add( this.m_3vCurrPos );
+    
+    var newBox = new THREE.Box2( v2Min, v2Max );
+    // decoreate the box
+    newBox.name = collSource.name;
+    newBox.channels = collSource.channels;
+    
+    return newBox;
+};
+
+GameObject.prototype.AddCollisionCallback = function( _callback ) {
+    
+    this.m_onCollisionCallbacks.push( _callback.bind(this) );
+};
+
 //==============================================================================
 GameObject.prototype.onCollision = function( _otherGameobject ) {
     
     for( var itr in this.m_onCollisionCallbacks ){
         var currCall = this.m_onCollisionCallbacks[itr];
-        currCall();
+        currCall( _otherGameobject );
     }
+};
+
+GameObject.prototype.AddDestroyCallback = function( _callback ) {
+    
+  this.m_onDestroyCallbacks.push( _callback.bind(this) );  
 };
 
 //==============================================================================
@@ -97,15 +141,42 @@ GameObject.prototype.Destroy = function() {
     }
 };
 
-var FIXED_TIMESTEP = 0.0333;
+var FIXED_TIMESTEP = 0.0416;
 
+//==============================================================================
 //==============================================================================
 function GameManager() {
     this.m_nLastUpdate = 0;
     this.m_nFixedTimer = 0;
     this.m_CreateFunctions = {};
+    this.m_ObjectTamplates = {};
     this.m_GameObjects = [];
 }
+
+//==============================================================================
+GameManager.prototype.Load = function( _path ) {
+    var that = this;
+    $.getJSON( _path, function(_Index) {
+        
+        for( var objName in _Index.objects) {
+            that.m_ObjectTamplates[objName] = _Index.objects[objName];
+        }
+        
+        that.onload();
+    });
+};
+
+// empty default just to have it exist
+//==============================================================================
+GameManager.prototype.onload = function() {
+    
+};
+
+//==============================================================================
+GameManager.prototype.GetColliders = function( _name ) {
+    
+  return this.m_ObjectTamplates[ _name ]["colliders"];
+};
 
 //==============================================================================
 GameManager.prototype.Start = function() {
@@ -127,7 +198,7 @@ GameManager.prototype.SpawnObject = function( _name ) {
         gameObject = this.m_CreateFunctions[ _name ]( d3Object );
     }
     else {
-        gameObject = new GameObject( d3Object, [] );
+        gameObject = new GameObject( d3Object, this.GetColliders( _name ) );
     }
     
     this.m_GameObjects.push( gameObject );
@@ -152,7 +223,80 @@ GameManager.prototype.Update = function() {
         this.m_GameObjects.forEach( function( currentValue, index, array ){
             currentValue.FixedUpdate(FIXED_TIMESTEP);
         });
+        
+        for( var i = 0; i < this.m_GameObjects.length; ++i ) {
+            var firstObject = this.m_GameObjects[i];
+            
+            for( var n = i + 1; n < this.m_GameObjects.length; ++n ) {
+                var secondObject = this.m_GameObjects[n];
+                
+                for( var v = 0; v < firstObject.GetColliderCount(); ++v ) {
+                    var firstCollider = firstObject.GetCollider( v );
+                    
+                    for( var k = 0; k < secondObject.GetColliderCount(); ++k ) {
+                        var secondCollider = secondObject.GetCollider( k );
+                        
+                        if( this.DoCollision( firstObject, firstCollider, secondObject, secondCollider ) ) {
+                            firstObject.onCollision( secondObject );
+                            secondObject.onCollision( firstObject );
+                        }
+                    }
+                }
+            }
+        }
     }
+};
+
+//==============================================================================
+GameManager.prototype.HasMatchingChannels = function( _first, _second ) {
+    
+    var foundMatch = false;
+    
+    _first.forEach( function( value ){
+        if( _second.includes( value ) ) {
+            foundMatch = true;
+        }
+    });
+    
+    return foundMatch;
+};
+
+//==============================================================================
+GameManager.prototype.DoCollision = function( _object1, _collider1, _object2, _collider2 ) {
+    
+    if( Array.isArray( _collider1.channels ) && Array.isArray( _collider2.channels ) ) {
+        if( !this.HasMatchingChannels( _collider1.channels, _collider2.channels ) ) {
+            return false;
+        }    
+    }
+    
+    if( _collider1.intersectsBox( _collider2 ) ) {
+        
+        var vToColl2 = _collider2.center().sub( _collider1.center() );
+        
+        var xSign = Math.sign( vToColl2.x );
+        vToColl2.x = Math.abs( _collider1.size().x / 2 + _collider2.size().x / 2 - Math.abs( vToColl2.x ) );
+        
+        var ySign = Math.sign( vToColl2.y );
+        vToColl2.y = Math.abs( _collider1.size().y / 2 + _collider2.size().y / 2 - Math.abs( vToColl2.y ) );
+            
+        if( Math.abs( vToColl2.x ) < Math.abs( vToColl2.y ) ) {
+            
+            _object1.ShiftPostion( vToColl2.x / -2  * xSign, 0 );
+            _object2.ShiftPostion( vToColl2.x / 2  * xSign, 0 );
+        }
+        else {
+            
+            _object1.ShiftPostion( 0, vToColl2.y / -2  * ySign );
+            _object2.ShiftPostion( 0, vToColl2.y / 2  * ySign );
+        }
+        
+        
+        
+        return true;
+    }
+    
+    return false;
 };
 
 //==============================================================================

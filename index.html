@@ -28,10 +28,18 @@
       window.engine.Renderer.Load( "resources/index.json" );
       window.engine.Renderer.onLoad = function(){
         
-        window.engine.GameManager.Start();
-        window.engine.GameManager.SpawnObject( "humanoid" );
-        main();
-        
+        window.engine.GameManager.Load( "resources/index.json" );
+        window.engine.GameManager.onload = function() {
+          
+          window.engine.GameManager.Start();
+          window.engine.GameManager.SpawnObject( "humanoid" );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 20 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -20 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 20, 0 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -20, 0 );
+          main();
+  
+        };
       };
     }
     

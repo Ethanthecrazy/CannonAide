@@ -81,6 +81,11 @@ Renderer.prototype.onResize = function( _nWidth, _nHeight) {
 };
 
 //==============================================================================
+Renderer.prototype.GetGameDimensions = function() {
+    return new THREE.Vector2( this.m_3Camera.right * 2, this.m_3Camera.top * 2 );
+};
+
+//==============================================================================
 Renderer.prototype.Load = function( _path ) {
     var that = this;
     $.getJSON( _path, function(_Index) {
@@ -101,11 +106,6 @@ Renderer.prototype.Load = function( _path ) {
 };
 
 //==============================================================================
-Renderer.prototype.GetGameDimensions = function() {
-    return new THREE.Vector2( this.m_3Camera.right * 2, this.m_3Camera.top * 2 );
-};
-
-//==============================================================================
 Renderer.prototype.LoadMaterial = function(_path ) {
     
     if( this.m_3Materials[_path] != null ) {
@@ -123,6 +123,8 @@ Renderer.prototype.LoadMaterial = function(_path ) {
         that.m_3Materials[_path] = material;
         
 	}, this.onProgress, this.onError );
+	
+	this.m_3Materials[_path] = "loading";
 };
 
 //==============================================================================
@@ -142,6 +144,8 @@ Renderer.prototype.LoadGeometry = function(_path ) {
 		});
 		
 	}, this.onProgress, this.onError );
+	
+	this.m_3Geos[_path] = "loading";
 };
 
 //==============================================================================
@@ -193,6 +197,25 @@ Renderer.prototype.CreateRenderObject = function(_name) {
         var newMesh = new THREE.Mesh(sourceGeo, sourceTex);
         newObject.add(newMesh);
     }
+    
+    var material = new THREE.LineBasicMaterial({
+    	color: 0xffffff
+    });
+
+    sourceObject.colliders.forEach( function( curr, index, array ){
+        
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push(
+        	new THREE.Vector3( curr.left, curr.top, 0 ),
+        	new THREE.Vector3( curr.right, curr.top, 0 ),
+        	new THREE.Vector3( curr.right, curr.bottom, 0 ),
+        	new THREE.Vector3( curr.left, curr.bottom, 0 ),
+        	new THREE.Vector3( curr.left, curr.top, 0 )
+        );
+
+        var line = new THREE.Line( geometry, material );
+        newObject.add(line);
+    });
     
     this.m_3Scene.add(newObject);
     return newObject;
