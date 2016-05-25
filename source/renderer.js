@@ -4,7 +4,7 @@
 function Renderer() {
     
     this.m_3Scene = new THREE.Scene(); 
-    this.m_3Plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0 ), 0 );
+    this.m_3Plane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), 0 );
     this.m_3Raycaster = new THREE.Raycaster();
 
     // Startup the loading manager
@@ -241,9 +241,10 @@ Renderer.prototype.GetCameraWorldCorners = function() {
 
 //==============================================================================
 Renderer.prototype.ScreenToGamePoint = function( _fScreenPosX, _fScreenPosY ) {
-    this.m_3Raycaster.setFromCamera( new THREE.Vector2( _fScreenPosX, _fScreenPosY ), this.m_3Camera );
+    var vRelativePoint = new THREE.Vector2( ( _fScreenPosX - 0.5 ) * 2, ( _fScreenPosY - 0.5 ) * 2 );
+    this.m_3Raycaster.setFromCamera( vRelativePoint, this.m_3Camera );
     var threeIntersect = this.m_3Raycaster.ray.intersectPlane( this.m_3Plane );
-    return {x:threeIntersect.x, z:threeIntersect.z};
+    return {x:threeIntersect.x, y:threeIntersect.y};
 };
     
 if( !window.engine )

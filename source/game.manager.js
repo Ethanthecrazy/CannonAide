@@ -49,9 +49,15 @@ GameObject.prototype.SetVelocity = function( _x, _y ) {
 };
 
 //==============================================================================
-GameObject.prototype.AddVelocity = function( _x, _y ) {
+GameObject.prototype.AddVelocity = function( _x, _y, _cap ) {
     var vNewVel = new THREE.Vector2( -_x, -_y );
     this.m_3vPrevPos.addVectors( this.m_3vPrevPos, vNewVel );
+    
+    if( _cap ) {
+        var vToOldPos = this.m_3vPrevPos.sub( this.m_3vCurrPos );
+        vToOldPos.clampLength( -_cap, _cap );
+        this.m_3vPrevPos.addVectors( this.m_3vCurrPos, vToOldPos );
+    }
 };
 
 //==============================================================================
@@ -195,7 +201,7 @@ GameManager.prototype.SpawnObject = function( _name ) {
     var gameObject = null;
     
     if( this.m_CreateFunctions[ _name ] ) {
-        gameObject = this.m_CreateFunctions[ _name ]( d3Object );
+        gameObject = this.m_CreateFunctions[ _name ]( null, d3Object );
     }
     else {
         gameObject = new GameObject( d3Object, this.GetColliders( _name ) );

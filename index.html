@@ -10,6 +10,7 @@
   <script type="text/javascript" src="source/lib//OBJLoader.js"></script>
   <script type="text/javascript" src="source/lib//Array.Prototype.Find.js"></script>
   <script type="text/javascript" src="source/renderer.js"></script>
+  <script type="text/javascript" src="source/input.manager.js"></script>
   <script type="text/javascript" src="source/game.manager.js"></script>
   <script type="text/javascript" src="source/entities.js"></script>
 </head>
@@ -46,8 +47,13 @@
     function main() {
 
         requestAnimationFrame( main );
+        
 				window.engine.GameManager.Update();
         window.engine.Renderer.Render();
+        
+        // Input needs to be updated so the the engine can respond to callback
+        // state before it is cleared.
+        //window.engine.InputManager.Update();
     }
     
 </script>
