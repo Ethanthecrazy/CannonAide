@@ -1,6 +1,6 @@
 {
 	"objects": {
-		"humanoid": {
+		"player": {
 			"meshes": [ 
 				{ "geo": "good-fighter/good-fighter.obj", "tex": "Char_UV_Texture.gif" }
 			],
@@ -14,6 +14,16 @@
 			],
 			"colliders":[ 
 				{ "name": "default", "channels": [2], "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"left-barrier": {
+			"colliders":[ 
+				{ "name": "left-barrier", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"right-barrier": {
+			"colliders":[ 
+				{ "name": "right-barrier", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
 			]
 		}
 	}

@@ -33,7 +33,9 @@
         window.engine.GameManager.onload = function() {
           
           window.engine.GameManager.Start();
-          window.engine.GameManager.SpawnObject( "humanoid" );
+          window.engine.GameManager.SpawnObject( "player" );
+          window.engine.GameManager.SpawnObject( "left-barrier" );
+          window.engine.GameManager.SpawnObject( "right-barrier" );
           window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 20 );
           window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -20 );
           window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 20, 0 );
