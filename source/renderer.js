@@ -80,7 +80,7 @@ Renderer.prototype.Init = function(canvas) {
 
     this.m_3Renderer.setPixelRatio(window.devicePixelRatio);
     this.m_3Renderer.setSize(setWidth, setHeight);
-    this.m_3Renderer.setClearColor(0x254B96);
+    this.m_3Renderer.setClearColor(0x000000);
 
     window.onresize = function() {
         this.onResize(window.innerWidth, window.innerHeight);

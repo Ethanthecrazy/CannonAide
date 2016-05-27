@@ -2,7 +2,7 @@
 	"objects": {
 		"player": {
 			"meshes": [ 
-				{ "geo": "good-fighter/good-fighter.obj", "tex": "Char_UV_Texture.gif" }
+				{ "geo": "player.obj", "tex": "player.png" }
 			],
 			"colliders":[ 
 				{ "name": "default", "channels": [2], "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
