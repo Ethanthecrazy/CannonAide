@@ -33,13 +33,18 @@
         window.engine.GameManager.onload = function() {
           
           window.engine.GameManager.Start();
-          window.engine.GameManager.SpawnObject( "player" );
+          
           window.engine.GameManager.SpawnObject( "left-barrier" );
           window.engine.GameManager.SpawnObject( "right-barrier" );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 20 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -20 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 20, 0 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -20, 0 );
+          window.engine.GameManager.SpawnObject( "bottom-barrier" );
+          window.engine.GameManager.SpawnObject( "top-barrier" );
+          
+          window.engine.GameManager.SpawnObject( "player" );
+          
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 10 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -10 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 10, 0 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -10, 0 );
           main();
   
         };

@@ -18,12 +18,22 @@
 		},
 		"left-barrier": {
 			"colliders":[ 
-				{ "name": "left-barrier", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
 			]
 		},
 		"right-barrier": {
 			"colliders":[ 
-				{ "name": "right-barrier", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"bottom-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"top-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
 		}
 	}

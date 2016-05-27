@@ -101,3 +101,47 @@ window.engine.GameManager.AddObjectFunction("left-barrier", function(_gameObject
 
     return newObj;
 });
+
+window.engine.GameManager.AddObjectFunction("bottom-barrier", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("bottom-barrier"));
+
+    newObj.AddUpdateCallback(function(_fDT) {
+        var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 0);
+        var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 0);
+        if (leftPoint && rightPoint) {
+            var width = leftPoint.distanceTo( rightPoint );
+            
+            newObj.m_3Colliders[0].left = width / -2;
+            newObj.m_3Colliders[0].right = width / 2;
+            
+            newObj.SetPosition(( leftPoint.x + rightPoint.x ) / 2, leftPoint.y - 1);
+            newObj.SetVelocity(0, 0);
+        }
+
+    });
+
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("top-barrier"));
+
+    newObj.AddUpdateCallback(function(_fDT) {
+        var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 1);
+        var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 1);
+        if (leftPoint && rightPoint) {
+            var width = leftPoint.distanceTo( rightPoint );
+            
+            newObj.m_3Colliders[0].left = width / -2;
+            newObj.m_3Colliders[0].right = width / 2;
+            
+            newObj.SetPosition(( leftPoint.x + rightPoint.x ) / 2, leftPoint.y + 1);
+            newObj.SetVelocity(0, 0);
+        }
+
+    });
+
+    return newObj;
+});
