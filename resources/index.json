@@ -1,19 +1,47 @@
 {
 	"objects": {
-		"humanoid": {
+		"player": {
 			"meshes": [ 
-				{ "geo": "hmanoidv3.obj", "tex": "Char_UV_Texture.gif" }
+				{ "geo": "player.obj", "tex": "player.png" }
 			],
 			"colliders":[ 
-				{ "name": "default", "channels": [2], "left": -1.5, "right": 1.5, "top": 1.5, "bottom": -1.5 }
+				{ "name": "default", "channels": [2], "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
+			]
+		},
+		"p-bullet": {
+			"meshes": [ 
+				{ "geo": "player/pbullet.obj", "tex": "player/PBulletDiffuse.png" }
+			],
+			"colliders":[ 
+				{ "name": "default", "channels": [3], "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
 		},
 		"debris": {
 			"meshes": [ 
-				{ "geo": "hmanoidv3.obj", "tex": "Char_UV_Texture.gif" }
+				{ "geo": "cube.obj", "tex": "cubetex.png" }
 			],
 			"colliders":[ 
-				{ "name": "default", "channels": [2], "left": -2, "right": 2, "top": 2, "bottom": -2 }
+				{ "name": "default", "channels": [2,3], "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"left-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"right-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"bottom-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"top-barrier": {
+			"colliders":[ 
+				{ "name": "immune", "channels": [2], "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
 		}
 	}

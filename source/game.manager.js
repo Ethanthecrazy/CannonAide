@@ -29,12 +29,22 @@ GameObject.prototype.SetPosition = function( _x, _y ) {
     
     this.m_3vCurrPos.set( _x, _y );
     this.m_3vPrevPos.addVectors( this.m_3vCurrPos, vOffset );
+    
+    if( this.m_3DObject ) {
+        this.m_3DObject.position.x = this.m_3vCurrPos.x;
+        this.m_3DObject.position.y = this.m_3vCurrPos.y;
+    }
 };
 
 //==============================================================================
 GameObject.prototype.ShiftPostion = function( _x, _y ) {
     this.m_3vCurrPos.x += _x;
     this.m_3vCurrPos.y += _y;
+    
+    if( this.m_3DObject ) {
+        this.m_3DObject.position.x = this.m_3vCurrPos.x;
+        this.m_3DObject.position.y = this.m_3vCurrPos.y;
+    }
 };
 
 //==============================================================================
@@ -49,9 +59,20 @@ GameObject.prototype.SetVelocity = function( _x, _y ) {
 };
 
 //==============================================================================
-GameObject.prototype.AddVelocity = function( _x, _y ) {
+GameObject.prototype.AddVelocity = function( _x, _y, _cap ) {
     var vNewVel = new THREE.Vector2( -_x, -_y );
     this.m_3vPrevPos.addVectors( this.m_3vPrevPos, vNewVel );
+    
+    if( _cap ) {
+        var vToOldPos = this.m_3vPrevPos.sub( this.m_3vCurrPos );
+        vToOldPos.clampLength( -_cap, _cap );
+        this.m_3vPrevPos.addVectors( this.m_3vCurrPos, vToOldPos );
+    }
+};
+
+//==============================================================================
+GameObject.prototype.GetVelocity = function() {
+    return new THREE.Vector2( this.m_3vCurrPos.x - this.m_3vPrevPos.x, this.m_3vCurrPos.y - this.m_3vPrevPos.y );
 };
 
 //==============================================================================
@@ -195,7 +216,11 @@ GameManager.prototype.SpawnObject = function( _name ) {
     var gameObject = null;
     
     if( this.m_CreateFunctions[ _name ] ) {
-        gameObject = this.m_CreateFunctions[ _name ]( d3Object );
+        gameObject = this.m_CreateFunctions[ _name ]( null, d3Object );
+        if( !gameObject ) {
+            console.log( "Create function '" + _name + "' did not return an object" );
+            return;
+        }
     }
     else {
         gameObject = new GameObject( d3Object, this.GetColliders( _name ) );

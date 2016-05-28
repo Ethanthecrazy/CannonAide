@@ -10,6 +10,7 @@
   <script type="text/javascript" src="source/lib//OBJLoader.js"></script>
   <script type="text/javascript" src="source/lib//Array.Prototype.Find.js"></script>
   <script type="text/javascript" src="source/renderer.js"></script>
+  <script type="text/javascript" src="source/input.manager.js"></script>
   <script type="text/javascript" src="source/game.manager.js"></script>
   <script type="text/javascript" src="source/entities.js"></script>
 </head>
@@ -32,11 +33,18 @@
         window.engine.GameManager.onload = function() {
           
           window.engine.GameManager.Start();
-          window.engine.GameManager.SpawnObject( "humanoid" );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 20 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -20 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 20, 0 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -20, 0 );
+          
+          window.engine.GameManager.SpawnObject( "left-barrier" );
+          window.engine.GameManager.SpawnObject( "right-barrier" );
+          window.engine.GameManager.SpawnObject( "bottom-barrier" );
+          window.engine.GameManager.SpawnObject( "top-barrier" );
+          
+          window.engine.GameManager.SpawnObject( "player" );
+          
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 10 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -10 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 10, 0 );
+          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -10, 0 );
           main();
   
         };
@@ -46,8 +54,13 @@
     function main() {
 
         requestAnimationFrame( main );
+        
 				window.engine.GameManager.Update();
         window.engine.Renderer.Render();
+        
+        // Input needs to be updated so the the engine can respond to callback
+        // state before it is cleared.
+        //window.engine.InputManager.Update();
     }
     
 </script>
