@@ -127,6 +127,8 @@ Renderer.prototype.Load = function(_path) {
 
             that.m_3RenderObjects[objName] = currObj;
         }
+    }).fail( function() {
+       console.log( "Failed to load '" + _path + "'." ); 
     });
 };
 
@@ -223,7 +225,7 @@ Renderer.prototype.CreateRenderObject = function(_name) {
         }
     }
 
-    var material = new THREE.LineBasicMaterial({
+    /*var material = new THREE.LineBasicMaterial({
         color: 0xffffff
     });
 
@@ -242,7 +244,7 @@ Renderer.prototype.CreateRenderObject = function(_name) {
             var line = new THREE.Line(geometry, material);
             newObject.add(line);
         });
-    }
+    }*/
 
 
     this.m_3Scene.add(newObject);

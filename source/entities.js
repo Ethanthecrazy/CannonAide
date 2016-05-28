@@ -4,6 +4,8 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
 
+    var fireTimer = 1;
+    
     newObj.AddUpdateCallback(function(_fDT) {
 
         var Input = window.engine.InputManager;
@@ -45,12 +47,46 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             toPoint.clampLength(-1, 1);
             newObj.AddVelocity(toPoint.x, toPoint.y);
         }
+        
+        fireTimer += _fDT;
+        
+        if( Input.IsKeyDown(90) || Input.GetTouchCount() > 0 ) {
+            if( fireTimer > 0.5 ) {
+                
+                var newBullet = window.engine.GameManager.SpawnObject( "p-bullet" );
+                var sourcePos = newObj.GetPosition();
+                newBullet.SetPosition( sourcePos.x, sourcePos.y + 1 );
+                fireTimer = 0;
+            }
+        }
+        
+        newObj.m_3DObject.rotation.y = newObj.GetVelocity().x * 0.75;
+        newObj.m_3DObject.rotation.x = newObj.GetVelocity().y * -0.75;
     });
 
     newObj.AddCollisionCallback(function(_otherObj) {
-
+        
     });
 
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
+    
+    var deathTimer = 0;
+    newObj.AddUpdateCallback(function(_fDT) {
+        newObj.SetVelocity( 0, 2);
+        deathTimer += _fDT;
+        if( deathTimer > 4)
+            newObj.Destroy();
+    });
+    
+    newObj.AddCollisionCallback(function(_otherObj) {
+        newObj.Destroy();
+    });
+    
     return newObj;
 });
 
@@ -140,7 +176,6 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
             newObj.SetPosition(( leftPoint.x + rightPoint.x ) / 2, leftPoint.y + 1);
             newObj.SetVelocity(0, 0);
         }
-
     });
 
     return newObj;
