@@ -1,11 +1,37 @@
 /* global GameObject */
+var g_GameManager = window.engine.GameManager;
+var g_InputManager = window.engine.InputManager;
+var g_Player = null;
+
+window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d3Object) {
+
+    var newObj = new GameObject(null, []);
+
+    g_GameManager.SpawnObject("left-barrier");
+    g_GameManager.SpawnObject("right-barrier");
+    g_GameManager.SpawnObject("bottom-barrier");
+    g_GameManager.SpawnObject("top-barrier");
+
+    g_Player = g_GameManager.SpawnObject("player");
+
+    var fSpawnTimer = 0;
+    newObj.AddUpdateCallback(function(_fDT) {
+        fSpawnTimer += _fDT;
+        if (fSpawnTimer > 3) {
+            g_GameManager.SpawnObject("debris");
+            fSpawnTimer = 0;
+        }
+    });
+
+    return newObj;
+});
 
 window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
 
     var fireTimer = 1;
-    
+
     newObj.AddUpdateCallback(function(_fDT) {
 
         var Input = window.engine.InputManager;
@@ -47,25 +73,26 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             toPoint.clampLength(-1, 1);
             newObj.AddVelocity(toPoint.x, toPoint.y);
         }
-        
+
         fireTimer += _fDT;
-        
-        if( Input.IsKeyDown(90) || Input.GetTouchCount() > 0 ) {
-            if( fireTimer > 0.5 ) {
-                
-                var newBullet = window.engine.GameManager.SpawnObject( "p-bullet" );
+
+        if (Input.IsKeyDown(90) || Input.GetTouchCount() > 0) {
+            if (fireTimer > 0.5) {
+
+                var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
                 var sourcePos = newObj.GetPosition();
-                newBullet.SetPosition( sourcePos.x, sourcePos.y + 1 );
+                var sourceVel = newObj.GetVelocity();
+                newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
                 fireTimer = 0;
             }
         }
-        
+
         newObj.m_3DObject.rotation.y = newObj.GetVelocity().x * 0.75;
         newObj.m_3DObject.rotation.x = newObj.GetVelocity().y * -0.75;
     });
 
     newObj.AddCollisionCallback(function(_otherObj) {
-        
+
     });
 
     return newObj;
@@ -74,19 +101,20 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
-    
+
     var deathTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
-        newObj.SetVelocity( 0, 2);
+        newObj.SetVelocity(0, 2);
         deathTimer += _fDT;
-        if( deathTimer > 4)
+        if (deathTimer > 4)
             newObj.Destroy();
     });
-    
+
     newObj.AddCollisionCallback(function(_otherObj) {
+        _otherObj.Damage(1);
         newObj.Destroy();
     });
-    
+
     return newObj;
 });
 
@@ -95,6 +123,7 @@ window.engine.GameManager.AddObjectFunction("debris", function(_gameObject, _d3O
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("debris"));
 
     _d3Object.rotation.x = 3.14;
+    newObj.m_nHealth = 1;
 
     newObj.AddUpdateCallback(function(_fDT) {
 
@@ -146,12 +175,12 @@ window.engine.GameManager.AddObjectFunction("bottom-barrier", function(_gameObje
         var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 0);
         var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 0);
         if (leftPoint && rightPoint) {
-            var width = leftPoint.distanceTo( rightPoint );
-            
+            var width = leftPoint.distanceTo(rightPoint);
+
             newObj.m_3Colliders[0].left = width / -2;
             newObj.m_3Colliders[0].right = width / 2;
-            
-            newObj.SetPosition(( leftPoint.x + rightPoint.x ) / 2, leftPoint.y - 1);
+
+            newObj.SetPosition((leftPoint.x + rightPoint.x) / 2, leftPoint.y - 1);
             newObj.SetVelocity(0, 0);
         }
 
@@ -168,12 +197,12 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
         var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 1);
         var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 1);
         if (leftPoint && rightPoint) {
-            var width = leftPoint.distanceTo( rightPoint );
-            
+            var width = leftPoint.distanceTo(rightPoint);
+
             newObj.m_3Colliders[0].left = width / -2;
             newObj.m_3Colliders[0].right = width / 2;
-            
-            newObj.SetPosition(( leftPoint.x + rightPoint.x ) / 2, leftPoint.y + 1);
+
+            newObj.SetPosition((leftPoint.x + rightPoint.x) / 2, leftPoint.y + 1);
             newObj.SetVelocity(0, 0);
         }
     });

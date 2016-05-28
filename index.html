@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="source/lib//three.js"></script>
-  <script type="text/javascript" src="source/lib//OBJLoader.js"></script>
-  <script type="text/javascript" src="source/lib//Array.Prototype.Find.js"></script>
+  <script type="text/javascript" src="source/lib/three.js"></script>
+  <script type="text/javascript" src="source/lib/stats.min.js"></script>
+  <script type="text/javascript" src="source/lib/OBJLoader.js"></script>
+  <script type="text/javascript" src="source/lib/Array.Prototype.Find.js"></script>
   <script type="text/javascript" src="source/renderer.js"></script>
   <script type="text/javascript" src="source/input.manager.js"></script>
   <script type="text/javascript" src="source/game.manager.js"></script>
@@ -21,49 +22,36 @@
     </canvas>
   </div>
   <script>
-    
-    init();
-    
-    function init() {
-      window.engine.Renderer.Init( document.getElementById("viewport") );
-      window.engine.Renderer.Load( "resources/index.json" );
-      window.engine.Renderer.onLoad = function(){
-        
-        window.engine.GameManager.Load( "resources/index.json" );
-        window.engine.GameManager.onload = function() {
-          
-          window.engine.GameManager.Start();
-          
-          window.engine.GameManager.SpawnObject( "left-barrier" );
-          window.engine.GameManager.SpawnObject( "right-barrier" );
-          window.engine.GameManager.SpawnObject( "bottom-barrier" );
-          window.engine.GameManager.SpawnObject( "top-barrier" );
-          
-          window.engine.GameManager.SpawnObject( "player" );
-          
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, 10 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 0, -10 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( 10, 0 );
-          window.engine.GameManager.SpawnObject( "debris" ).SetPosition( -10, 0 );
-          main();
-  
-        };
+    /* global Stats */
+    var stats = new Stats();
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
+
+    window.engine.Renderer.Init(document.getElementById("viewport"));
+    window.engine.Renderer.Load("resources/index.json");
+    window.engine.Renderer.onLoad = function() {
+
+      window.engine.GameManager.Load("resources/index.json");
+      window.engine.GameManager.onload = function() {
+
+        window.engine.GameManager.Start();
+        window.engine.GameManager.SpawnObject("AideGame");
+
+        main();
+
       };
-    }
-    
+    };
+
     function main() {
 
-        requestAnimationFrame( main );
-        
-				window.engine.GameManager.Update();
-        window.engine.Renderer.Render();
-        
-        // Input needs to be updated so the the engine can respond to callback
-        // state before it is cleared.
-        //window.engine.InputManager.Update();
+      requestAnimationFrame(main);
+
+      stats.begin();
+      window.engine.GameManager.Update();
+      window.engine.Renderer.Render();
+      stats.end();
     }
-    
-</script>
+  </script>
 
 </body>
 

@@ -213,6 +213,12 @@ Renderer.prototype.CreateRenderObject = function(_name) {
     var newObject = new THREE.Object3D();
 
     var sourceObject = this.m_3RenderObjects[_name];
+    
+    if( !sourceObject ) {
+        console.log( "Failed to load 3D Object for '" + _name + "'." );
+        return null;
+    }
+    
     if (sourceObject.meshes) {
 
         for (var i = 0; i < sourceObject.meshes.length; ++i) {
