@@ -11,14 +11,16 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("right-barrier");
     g_GameManager.SpawnObject("bottom-barrier");
     g_GameManager.SpawnObject("top-barrier");
+    g_GameManager.SpawnObject("sphere").SetPosition(-8, 8);
 
     g_Player = g_GameManager.SpawnObject("player");
+    g_Player.SetPosition(0, -16);
 
     var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
         fSpawnTimer += _fDT;
         if (fSpawnTimer > 3) {
-            g_GameManager.SpawnObject("debris");
+            g_GameManager.SpawnObject("sphere");
             fSpawnTimer = 0;
         }
     });
@@ -29,6 +31,8 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
 window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
+
+    newObj.m_nHealth = 3;
 
     var fireTimer = 1;
 
@@ -92,6 +96,14 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     });
 
     newObj.AddCollisionCallback(function(_otherObj) {
+
+    });
+
+    newObj.AddDestroyCallback(function() {
+        setTimeout(function() {
+            g_GameManager.DestroyAll();
+            g_GameManager.SpawnObject("AideGame");
+        }, 3000);
 
     });
 
@@ -204,6 +216,52 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
 
             newObj.SetPosition((leftPoint.x + rightPoint.x) / 2, leftPoint.y + 1);
             newObj.SetVelocity(0, 0);
+        }
+    });
+
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("e-bullet"));
+
+    newObj.m_3DObject.rotation.z = 3.14;
+
+    var deathTimer = 0;
+    newObj.AddUpdateCallback(function(_fDT) {
+        newObj.SetVelocity(0, -2);
+        deathTimer += _fDT;
+        if (deathTimer > 4)
+            newObj.Destroy();
+    });
+
+    newObj.AddCollisionCallback(function(_otherObj) {
+        _otherObj.Damage(1);
+        newObj.Destroy();
+    });
+
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
+
+    newObj.m_nHealth = 1;
+    var fireTimer = 0;
+
+    newObj.AddUpdateCallback(function(_fDT) {
+        newObj.m_3DObject.rotation.y += _fDT;
+
+        fireTimer += _fDT;
+        if (fireTimer > 3) {
+
+            var newBullet = window.engine.GameManager.SpawnObject("e-bullet");
+            var sourcePos = newObj.GetPosition();
+            var sourceVel = newObj.GetVelocity();
+            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y - 0.5 + sourceVel.y);
+            fireTimer = 0;
         }
     });
 
