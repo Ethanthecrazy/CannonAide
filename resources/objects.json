@@ -1,0 +1,64 @@
+{
+	"objects": {
+		"player": {
+			"meshes": [ 
+				{ "geo": "player/player.obj", "tex": "player/player.png" }
+			],
+			"colliders":[ 
+				{ "layer": "player", "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
+			]
+		},
+		"p-bullet": {
+			"meshes": [ 
+				{ "geo": "player/pbullet.obj", "tex": "player/PBulletDiffuse.png" }
+			],
+			"colliders":[ 
+				{ "layer": "p-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
+			]
+		},
+		"debris": {
+			"meshes": [ 
+				{ "geo": "cube.obj", "tex": "cubetex.png" }
+			],
+			"colliders":[ 
+				{ "layer": "enemy", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"left-barrier": {
+			"colliders":[ 
+				{ "layer": "barrier", "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"right-barrier": {
+			"colliders":[ 
+				{ "layer": "barrier", "left": -1, "right": 1, "top": 32, "bottom": -32 }
+			]
+		},
+		"bottom-barrier": {
+			"colliders":[ 
+				{ "layer": "barrier", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"top-barrier": {
+			"colliders":[ 
+				{ "layer": "barrier", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
+		"sphere": {
+			"meshes": [ 
+				{ "geo": "sphere/sphere.obj", "tex": "sphere/sphere.png" }
+			],
+			"colliders":[ 
+				{ "layer": "enemy", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -0.5 }
+			]
+		},
+		"e-bullet": {
+			"meshes": [ 
+				{ "geo": "player/pbullet.obj", "tex": "player/PBulletDiffuse.png" }
+			],
+			"colliders":[ 
+				{ "layer": "e-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
+			]
+		}
+	}
+}

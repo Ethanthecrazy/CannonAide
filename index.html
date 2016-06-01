@@ -31,7 +31,7 @@
     window.engine.Renderer.Load("resources/index.json");
     window.engine.Renderer.onLoad = function() {
 
-      window.engine.GameManager.Load("resources/index.json");
+      window.engine.GameManager.Load("resources/objects.json", "resources/collisions.json");
       window.engine.GameManager.onload = function() {
 
         window.engine.GameManager.Start();

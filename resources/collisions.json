@@ -1,0 +1,8 @@
+{
+    "collisions": [
+        [ "barrier",    "player"    ], 
+        [ "p-bullet",   "enemy"     ], 
+        [ "player",     "e-bullet"  ],
+        [ "player",     "enemy"     ]
+    ]
+}

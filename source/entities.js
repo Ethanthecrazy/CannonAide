@@ -22,8 +22,8 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
         fSpawnTimer += _fDT;
         if (fSpawnTimer > 3) {
 
-            var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0.1, 0.1);
-            var topRight = window.engine.Renderer.ScreenToGamePoint(0.9, 0.9);
+            var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0);
+            var topRight = window.engine.Renderer.ScreenToGamePoint(1, 1);
             if (bottomLeft && topRight) {
                 var vecLoc = null;
                 if (Math.abs(bottomLeft.x - topRight.x) > Math.abs(bottomLeft.y - topRight.y)) {
@@ -98,7 +98,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
         fireTimer += _fDT;
 
         if (Input.IsKeyDown(90) || Input.GetTouchCount() > 0) {
-            if (fireTimer > 0.5) {
+            if (fireTimer > 0.25) {
 
                 var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
                 var sourcePos = newObj.GetPosition();
