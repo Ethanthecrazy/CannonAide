@@ -165,11 +165,11 @@ GameObject.prototype.Destroy = function() {
         currCall();
     }
 
-    window.engine.GameManager.RemoveGameObject(this);
-
     if (this.m_3DObject) {
         window.engine.Renderer.Remove3DObject(this.m_3DObject);
     }
+    
+    window.engine.GameManager.RemoveGameObject(this);
 };
 
 var FIXED_TIMESTEP = 0.0416;
@@ -248,10 +248,6 @@ GameManager.prototype.Update = function() {
     var dt = (now - this.m_nLastUpdate) / 1000;
     this.m_nLastUpdate = now;
 
-    this.m_GameObjects.forEach(function(currentValue, index, array) {
-        currentValue.Update(dt);
-    });
-
     this.m_nFixedTimer += dt;
     if( this.m_nFixedTimer > FIXED_TIMESTEP * 10 ) {
         this.m_nFixedTimer = FIXED_TIMESTEP * 10;    
@@ -284,6 +280,10 @@ GameManager.prototype.Update = function() {
             }
         }
     }
+    
+    this.m_GameObjects.forEach(function(currentValue, index, array) {
+        currentValue.Update(dt);
+    });
 };
 
 //==============================================================================

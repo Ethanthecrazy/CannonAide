@@ -2,7 +2,7 @@
 	"objects": {
 		"player": {
 			"meshes": [ 
-				{ "geo": "player.obj", "tex": "player.png" }
+				{ "geo": "player/player.obj", "tex": "player/player.png" }
 			],
 			"colliders":[ 
 				{ "name": "default", "channels": [1,2,4], "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
@@ -57,7 +57,7 @@
 				{ "geo": "player/pbullet.obj", "tex": "player/PBulletDiffuse.png" }
 			],
 			"colliders":[ 
-				{ "name": "default", "channels": [4], "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
+				{ "name": "default", "channels": [], "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
 		}
 	}

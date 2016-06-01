@@ -1,4 +1,6 @@
 /* global GameObject */
+/* global THREE */
+
 var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
@@ -11,7 +13,6 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("right-barrier");
     g_GameManager.SpawnObject("bottom-barrier");
     g_GameManager.SpawnObject("top-barrier");
-    g_GameManager.SpawnObject("sphere").SetPosition(-8, 8);
 
     g_Player = g_GameManager.SpawnObject("player");
     g_Player.SetPosition(0, -16);
@@ -20,8 +21,24 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     newObj.AddUpdateCallback(function(_fDT) {
         fSpawnTimer += _fDT;
         if (fSpawnTimer > 3) {
-            g_GameManager.SpawnObject("sphere");
-            fSpawnTimer = 0;
+
+            var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0.1, 0.1);
+            var topRight = window.engine.Renderer.ScreenToGamePoint(0.9, 0.9);
+            if (bottomLeft && topRight) {
+                var vecLoc = null;
+                if (Math.abs(bottomLeft.x - topRight.x) > Math.abs(bottomLeft.y - topRight.y)) {
+                    vecLoc = new THREE.Vector3(topRight.x + 8, 0, 0);
+                }
+                else {
+                    vecLoc = new THREE.Vector3(topRight.y + 8, 0, 0);
+                }
+
+                var angle = THREE.Math.randFloat(0, 3.14);
+                vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+                g_GameManager.SpawnObject("sphere").SetPosition(vecLoc.x, vecLoc.y);
+
+                fSpawnTimer = 0;
+            }
         }
     });
 
@@ -230,7 +247,7 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
 
     var deathTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
-        newObj.SetVelocity(0, -2);
+        newObj.SetVelocity(0, -1);
         deathTimer += _fDT;
         if (deathTimer > 4)
             newObj.Destroy();
@@ -250,7 +267,7 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
 
     newObj.m_nHealth = 1;
     var fireTimer = 0;
-
+    var mode = "left";
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.m_3DObject.rotation.y += _fDT;
 
@@ -262,6 +279,39 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
             var sourceVel = newObj.GetVelocity();
             newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y - 0.5 + sourceVel.y);
             fireTimer = 0;
+        }
+
+        var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0.1);
+        var topRight = window.engine.Renderer.ScreenToGamePoint(1, 0.9);
+        if (bottomLeft && topRight) {
+
+            var objPos = newObj.GetPosition();
+
+            if (objPos.y + 0.5 > topRight.y) {
+                newObj.AddVelocity(0, -1 * _fDT);
+            }
+            else if(objPos.y - 0.5 < 0) {
+                newObj.AddVelocity(0, 1 * _fDT);
+            }
+            else {
+                if (objPos.x - 0.5 < bottomLeft.x) {
+                    mode = "right";
+                }
+                if (objPos.x + 0.5 > topRight.x) {
+                    mode = "left";
+                }
+
+                if (mode == "left") {
+                    newObj.AddVelocity(-0.5 * _fDT, 0);
+                }
+                else {
+                    newObj.AddVelocity(0.5 * _fDT, 0);
+                }
+
+                var vel = newObj.GetVelocity();
+                vel.clampLength(-0.5, 0.5);
+                newObj.SetVelocity(vel.x, vel.y);
+            }
         }
     });
 
