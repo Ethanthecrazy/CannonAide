@@ -113,27 +113,25 @@ Renderer.prototype.Load = function(_path) {
     var that = this;
     $.getJSON(_path, function(_Index) {
 
-        for (var objName in _Index.objects) {
-            var currObj = _Index.objects[objName];
-
-            if (currObj.meshes) {
-                for (var i = 0; i < currObj.meshes.length; ++i) {
-                    var currMesh = currObj.meshes[i];
-
-                    that.LoadMaterial(currMesh.tex);
-                    that.LoadGeometry(currMesh.geo);
-                }
-            }
-
-            that.m_3RenderObjects[objName] = currObj;
+        var loadMeshes = _Index["meshes"];
+        for (var meshIdx in loadMeshes) {
+            var currMesh = loadMeshes[meshIdx];
+            that.LoadGeometry(currMesh["name"], currMesh["path"]);
         }
+        
+        var loadTextures = _Index["textures"];
+        for (var texIdx in loadTextures) {
+            var currTex = loadTextures[texIdx];
+            that.LoadMaterial(currTex["name"], currTex["path"]);
+        }
+        
     }).fail( function() {
        console.log( "Failed to load '" + _path + "'." ); 
     });
 };
 
 //==============================================================================
-Renderer.prototype.LoadMaterial = function(_path) {
+Renderer.prototype.LoadMaterial = function( _name, _path) {
 
     if (this.m_3Materials[_path] != null) {
         return;
@@ -147,7 +145,7 @@ Renderer.prototype.LoadMaterial = function(_path) {
             map: texture
         });
 
-        that.m_3Materials[_path] = material;
+        that.m_3Materials[_name] = material;
 
     }, this.onProgress, this.onError);
 
@@ -155,7 +153,7 @@ Renderer.prototype.LoadMaterial = function(_path) {
 };
 
 //==============================================================================
-Renderer.prototype.LoadGeometry = function(_path) {
+Renderer.prototype.LoadGeometry = function( _name, _path) {
 
     if (this.m_3Geos[_path] != null) {
         return;
@@ -166,7 +164,7 @@ Renderer.prototype.LoadGeometry = function(_path) {
 
         object.traverse(function(child) {
             if (child instanceof THREE.Mesh) {
-                that.m_3Geos[_path] = child.geometry;
+                that.m_3Geos[_name] = child.geometry;
             }
         });
 
@@ -209,27 +207,22 @@ Renderer.prototype.Render = function() {
 };
 
 //==============================================================================
-Renderer.prototype.CreateRenderObject = function(_name) {
-    var newObject = new THREE.Object3D();
-
-    var sourceObject = this.m_3RenderObjects[_name];
+Renderer.prototype.CreateRenderObject = function(_geoName, _texName) {
     
-    if( !sourceObject ) {
-        console.log( "Failed to load 3D Object for '" + _name + "'." );
+    var sourceGeo = this.m_3Geos[_geoName];
+    if( !sourceGeo ) {
+        return null;
+    }
+        
+    var sourceTex = this.m_3Materials[_texName];
+    if( !sourceTex ) {
         return null;
     }
     
-    if (sourceObject.meshes) {
-
-        for (var i = 0; i < sourceObject.meshes.length; ++i) {
-            var currMesh = sourceObject.meshes[i];
-            var sourceGeo = this.m_3Geos[currMesh.geo];
-            var sourceTex = this.m_3Materials[currMesh.tex];
-
-            var newMesh = new THREE.Mesh(sourceGeo, sourceTex);
-            newObject.add(newMesh);
-        }
-    }
+    var newObject = new THREE.Object3D();
+    var newMesh = new THREE.Mesh(sourceGeo, sourceTex);
+    
+    newObject.add(newMesh);
 
     /*var material = new THREE.LineBasicMaterial({
         color: 0xffffff
@@ -251,7 +244,6 @@ Renderer.prototype.CreateRenderObject = function(_name) {
             newObject.add(line);
         });
     }*/
-
 
     this.m_3Scene.add(newObject);
     return newObject;

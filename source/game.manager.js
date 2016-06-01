@@ -241,10 +241,18 @@ GameManager.prototype.AddObjectFunction = function(_name, _funcCreate) {
 
 //==============================================================================
 GameManager.prototype.SpawnObject = function(_name) {
-
-    var d3Object = window.engine.Renderer.CreateRenderObject(_name);
+    
+    var d3Object = null;
+    var templateObject = this.m_ObjectTamplates[_name];
     var gameObject = null;
-
+    
+    if( templateObject ) {
+        d3Object = window.engine.Renderer.CreateRenderObject( templateObject["mesh"], templateObject["texture"] );
+    }
+    else {
+        console.log( "No object template found for '" + _name + "'.");
+    }
+    
     if (this.m_CreateFunctions[_name]) {
         gameObject = this.m_CreateFunctions[_name](null, d3Object);
         if (!gameObject) {
