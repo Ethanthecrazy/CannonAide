@@ -11,7 +11,7 @@ function AddTimeout( _gameObject, _time ) {
     _gameObject.AddUpdateCallback(function(_fDT) {
         deathTimer += _fDT;
         if (deathTimer > _time)
-            _gameObject.Destroy();
+            g_GameManager.Destroy( _gameObject );
     });
 }
 
@@ -25,6 +25,29 @@ function AddScaleOverTime( _gameObject, _minScale, _maxScale, _duration ) {
             var currScale = _minScale + percent * ( _maxScale - _minScale  );
             _gameObject.m_3DObject.scale.x = currScale;
             _gameObject.m_3DObject.scale.y = currScale;
+            _gameObject.m_3DObject.children[0].material.opacity = 1 - percent;
+        }
+    });
+}
+
+function AddDestroyParticle( _gameObject, _matName, _count, _duration, _startScale, _stopScale ) {
+    
+    _gameObject.AddDestroyCallback( function() {
+        
+        var pos = _gameObject.GetPosition();
+        for( var i = 0; i < _count; ++i ) {
+            
+            var objSprite = g_GameManager.SpawnObject(_matName, true);
+            objSprite.SetPosition( pos.x, pos.y );
+            
+            var angle = THREE.Math.randFloat(0, 3.14 * 2);
+            var vecDir = new THREE.Vector3( 1, 0, 0 );
+            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+            vecDir.multiplyScalar( THREE.Math.randFloat(0.1, 0.25) );
+            
+            objSprite.SetVelocity( vecDir.x, vecDir.y );
+            AddTimeout( objSprite, _duration );
+            AddScaleOverTime( objSprite, _startScale, _stopScale, _duration );
         }
     });
 }
@@ -39,7 +62,6 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
-    g_Player.SetPosition(0, -16);
 
     var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
@@ -76,8 +98,18 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     newObj.m_nHealth = 3;
 
     var fireTimer = 1;
+    var entranceTimer = 0;
 
     newObj.AddUpdateCallback(function(_fDT) {
+
+        if( entranceTimer < 1.5 ) {
+            
+            entranceTimer += _fDT;
+            var percent = THREE.Math.smoothstep( entranceTimer, 0, 1.5 );
+            newObj.SetPosition( 0, -40 + percent * 24 );
+            newObj.SetVelocity( 0, 0 );
+            return;
+        }
 
         var anyMove = false;
 
@@ -139,6 +171,8 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     });
 
+    AddDestroyParticle( newObj, "sprite-test", 32, 2.5, 1, 4);
+    
     newObj.AddDestroyCallback(function() {
         setTimeout(function() {
             g_GameManager.DestroyAll();
@@ -162,25 +196,10 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.Damage(1);
-        newObj.Destroy();
-        
-        var pos = newObj.GetPosition();
-        for( var i = 0; i < 16; ++i ) {
-            
-            var objSprite = g_GameManager.SpawnObject("sprite-test", true);
-            objSprite.SetPosition( pos.x, pos.y );
-            
-            var angle = THREE.Math.randFloat(0, 3.14 * 2);
-            var vecDir = new THREE.Vector3( 1, 0, 0 );
-            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-            vecDir.multiplyScalar( THREE.Math.randFloat(0.1, 0.25) );
-            
-            objSprite.SetVelocity( vecDir.x, vecDir.y );
-            AddTimeout( objSprite, 0.25 );
-            AddScaleOverTime( objSprite, 0.1, 0.6, 0.25 );
-            
-        }
+        g_GameManager.Destroy(newObj);
     });
+    
+    AddDestroyParticle( newObj, "sprite-test", 16, 0.25, 0.1, 0.6);
 
     return newObj;
 });
@@ -291,9 +310,11 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.Damage(1);
-        newObj.Destroy();
+        g_GameManager.Destroy(newObj);
     });
 
+    AddDestroyParticle( newObj, "sprite-test", 16, 0.25, 0.1, 0.6);
+    
     return newObj;
 });
 
@@ -350,6 +371,8 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
             }
         }
     });
-
+    
+    AddDestroyParticle( newObj, "sprite-test", 16, 0.5, 1, 2);
+    
     return newObj;
 });

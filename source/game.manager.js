@@ -14,7 +14,7 @@ function GameObject(_3DObject, _colliderList) {
     this.m_onUpdateCallbacks = [];
     this.m_onCollisionCallbacks = [];
     this.m_onDestroyCallbacks = [];
-    
+
     this.isDestroyed = false;
 }
 
@@ -151,7 +151,7 @@ GameObject.prototype.Damage = function(_amount) {
         this.m_nHealth -= _amount;
 
         if (this.m_nHealth < 1) {
-            this.Destroy();
+            window.engine.GameManager.Destroy(this);
         }
     }
 };
@@ -159,26 +159,6 @@ GameObject.prototype.Damage = function(_amount) {
 GameObject.prototype.AddDestroyCallback = function(_callback) {
 
     this.m_onDestroyCallbacks.push(_callback.bind(this));
-};
-
-//==============================================================================
-GameObject.prototype.Destroy = function() {
-    
-    if( this.isDestroyed )
-        return;
-    
-    for (var itr in this.m_onDestroyCallbacks) {
-        var currCall = this.m_onDestroyCallbacks[itr];
-        currCall();
-    }
-
-    if (this.m_3DObject) {
-        window.engine.Renderer.Remove3DObject(this.m_3DObject);
-    }
-
-    window.engine.GameManager.RemoveGameObject(this);
-    
-    this.isDestroyed = true;
 };
 
 var FIXED_TIMESTEP = 0.0416;
@@ -193,6 +173,7 @@ function GameManager() {
     this.m_Collisions = [];
     this.m_GameObjects = [];
     this.m_GameProps = [];
+    this.m_DestroyQueue = [];
 }
 
 //==============================================================================
@@ -242,18 +223,18 @@ GameManager.prototype.AddObjectFunction = function(_name, _funcCreate) {
 
 //==============================================================================
 GameManager.prototype.SpawnObject = function(_name, _isProp) {
-    
+
     var d3Object = null;
     var templateObject = this.m_ObjectTamplates[_name];
     var gameObject = null;
-    
-    if( templateObject ) {
-        d3Object = window.engine.Renderer.CreateRenderObject( templateObject["mesh"], templateObject["material"] );
+
+    if (templateObject) {
+        d3Object = window.engine.Renderer.CreateRenderObject(templateObject["mesh"], templateObject["material"]);
     }
     else {
-        console.log( "No object template found for '" + _name + "'.");
+        console.log("No object template found for '" + _name + "'.");
     }
-    
+
     if (this.m_CreateFunctions[_name]) {
         gameObject = this.m_CreateFunctions[_name](null, d3Object);
         if (!gameObject) {
@@ -265,18 +246,36 @@ GameManager.prototype.SpawnObject = function(_name, _isProp) {
         gameObject = new GameObject(d3Object, this.GetColliders(_name));
     }
 
-    if( _isProp ) {
+    if (_isProp) {
         this.m_GameProps.push(gameObject);
     }
     else {
         this.m_GameObjects.push(gameObject);
     }
-    
+
     return gameObject;
 };
 
 //==============================================================================
 GameManager.prototype.Update = function() {
+
+    // Clean up objects to destroy
+    while (this.m_DestroyQueue.length > 0) {
+        var currDestroy = this.m_DestroyQueue[0];
+
+        for (var itr in currDestroy.m_onDestroyCallbacks) {
+            currDestroy.m_onDestroyCallbacks[itr]();
+        }
+
+        if (currDestroy.m_3DObject) {
+            window.engine.Renderer.Remove3DObject(currDestroy.m_3DObject);
+        }
+
+        this.RemoveGameObject(currDestroy);
+        
+        this.m_DestroyQueue.shift();
+    }
+
 
     // Calculate delta time
     var now = Date.now();
@@ -297,7 +296,7 @@ GameManager.prototype.Update = function() {
         this.m_GameProps.forEach(function(currentValue, index, array) {
             currentValue.FixedUpdate(FIXED_TIMESTEP);
         });
-        
+
         for (var i = 0; i < this.m_GameObjects.length; ++i) {
             var firstObject = this.m_GameObjects[i];
 
@@ -323,7 +322,7 @@ GameManager.prototype.Update = function() {
     this.m_GameObjects.forEach(function(currentValue, index, array) {
         currentValue.Update(dt);
     });
-    
+
     this.m_GameProps.forEach(function(currentValue, index, array) {
         currentValue.Update(dt);
     });
@@ -338,11 +337,11 @@ GameManager.prototype.DoesCollide = function(_firstLayer, _secondLayer) {
     that.m_Collisions.forEach(function(currColl) {
         var tempColl = currColl.slice();
         var firstIndex = tempColl.indexOf(_firstLayer);
-        
-        if( firstIndex > -1 ) {
+
+        if (firstIndex > -1) {
             tempColl.splice(firstIndex, 1);
-            
-            if( tempColl.includes(_secondLayer) ) {
+
+            if (tempColl.includes(_secondLayer)) {
                 foundMatch = true;
             }
         }
@@ -388,26 +387,36 @@ GameManager.prototype.DoCollision = function(_object1, _collider1, _object2, _co
     return false;
 };
 
-//==============================================================================
-GameManager.prototype.RemoveGameObject = function(_object) {
-    
-    var objIndex = this.m_GameObjects.indexOf(_object);
-    if( objIndex > -1 ) {
-        this.m_GameObjects.splice( objIndex, 1);
-    }
-    
-    var propIndex = this.m_GameProps.indexOf(_object);
-    if( propIndex > -1 ) {
-        this.m_GameProps.splice( propIndex, 1);
+GameManager.prototype.Destroy = function(_object) {
+    if( !this.m_DestroyQueue.includes(_object) ) {
+        this.m_DestroyQueue.push(_object);
     }
 };
 
 GameManager.prototype.DestroyAll = function() {
-    while (this.m_GameObjects.length > 0)
-        this.m_GameObjects[0].Destroy();
-        
-    while (this.m_GameProps.length > 0)
-        this.m_GameProps[0].Destroy();
+    
+    var that = this;
+    this.m_GameObjects.forEach( function( currObj ) {
+        that.Destroy( currObj );
+    }); 
+
+    this.m_GameProps.forEach( function( currProp ) {
+        that.Destroy( currProp );
+    });
+};
+
+//==============================================================================
+GameManager.prototype.RemoveGameObject = function(_object) {
+
+    var objIndex = this.m_GameObjects.indexOf(_object);
+    if (objIndex > -1) {
+        this.m_GameObjects.splice(objIndex, 1);
+    }
+
+    var propIndex = this.m_GameProps.indexOf(_object);
+    if (propIndex > -1) {
+        this.m_GameProps.splice(propIndex, 1);
+    }
 };
 
 if (!window.engine)

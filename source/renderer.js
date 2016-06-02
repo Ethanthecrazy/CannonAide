@@ -237,7 +237,7 @@ Renderer.prototype.CreateRenderObject = function(_geoName, _texName) {
     var newObject = new THREE.Object3D();
     
     if( sourceMat instanceof THREE.SpriteMaterial ) {
-        var newSprite = new THREE.Sprite( sourceMat );
+        var newSprite = new THREE.Sprite( sourceMat.clone() );
         newSprite.position.z = 16;
         newObject.add( newSprite );
     }
