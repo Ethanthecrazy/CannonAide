@@ -1,29 +1,6 @@
 /* global THREE */
 /* global $ */
 
-var offsetCounter = 0;
-
-(function() {
-    var oldLog = console.log;
-    console.log = function(message) {
-
-        /*var text2 = document.createElement('div');
-        text2.style.position = 'absolute';
-        //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-        text2.style.width = 100;
-        text2.style.height = 100;
-        text2.style.color = "white";
-        text2.style.backgroundColor = "black";
-        text2.innerHTML = message;
-        offsetCounter += 20;
-        text2.style.top = offsetCounter + 'px';
-        text2.style.left = 20 + 'px';
-        document.body.appendChild(text2);*/
-
-        oldLog.apply(console, arguments);
-    };
-})();
-
 function Renderer() {
 
     this.m_3Scene = new THREE.Scene();
