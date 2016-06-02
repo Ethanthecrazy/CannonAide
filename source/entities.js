@@ -5,6 +5,30 @@ var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
 
+function AddTimeout( _gameObject, _time ) {
+    
+    var deathTimer = 0;
+    _gameObject.AddUpdateCallback(function(_fDT) {
+        deathTimer += _fDT;
+        if (deathTimer > _time)
+            _gameObject.Destroy();
+    });
+}
+
+function AddScaleOverTime( _gameObject, _minScale, _maxScale, _duration ) {
+    
+    var scaleTimer = 0;
+    _gameObject.AddUpdateCallback(function(_fDT) {
+        scaleTimer += _fDT;
+        if (scaleTimer < _duration) {
+            var percent = THREE.Math.smoothstep( scaleTimer, 0, _duration );
+            var currScale = _minScale + percent * ( _maxScale - _minScale  );
+            _gameObject.m_3DObject.scale.x = currScale;
+            _gameObject.m_3DObject.scale.y = currScale;
+        }
+    });
+}
+
 window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d3Object) {
 
     var newObj = new GameObject(null, []);
@@ -16,8 +40,6 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
 
     g_Player = g_GameManager.SpawnObject("player");
     g_Player.SetPosition(0, -16);
-    
-    g_GameManager.SpawnObject("sprite-test");
 
     var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
@@ -57,29 +79,28 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     newObj.AddUpdateCallback(function(_fDT) {
 
-        var Input = window.engine.InputManager;
         var anyMove = false;
 
-        if (Input.IsKeyDown(37)) {
+        if (g_InputManager.IsKeyDown(37)) {
 
             newObj.AddVelocity(-20 * _fDT, 0, 1);
             anyMove = true;
         }
 
-        if (Input.IsKeyDown(38)) {
+        if (g_InputManager.IsKeyDown(38)) {
 
             newObj.AddVelocity(0, 20 * _fDT, 1);
             anyMove = true;
 
         }
 
-        if (Input.IsKeyDown(39)) {
+        if (g_InputManager.IsKeyDown(39)) {
 
             newObj.AddVelocity(20 * _fDT, 0, 1);
             anyMove = true;
         }
 
-        if (Input.IsKeyDown(40)) {
+        if (g_InputManager.IsKeyDown(40)) {
 
             newObj.AddVelocity(0, -20 * _fDT, 1);
             anyMove = true;
@@ -88,8 +109,8 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
         if (!anyMove)
             newObj.SetVelocity(0, 0);
 
-        if (Input.GetTouchCount() > 0) {
-            var touch = Input.GetTouch(0);
+        if (g_InputManager.GetTouchCount() > 0) {
+            var touch = g_InputManager.GetTouch(0);
             var gamePoint = window.engine.Renderer.ScreenToGamePoint(touch.x, 1 - touch.y);
             gamePoint.y += 6.4 + 3.2;
             var toPoint = gamePoint.sub(newObj.GetPosition());
@@ -99,7 +120,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
         fireTimer += _fDT;
 
-        if (Input.IsKeyDown(90) || Input.GetTouchCount() > 0) {
+        if (g_InputManager.IsKeyDown(90) || g_InputManager.GetTouchCount() > 0) {
             if (fireTimer > 0.25) {
 
                 var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
@@ -133,17 +154,32 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
 
-    var deathTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, 2);
-        deathTimer += _fDT;
-        if (deathTimer > 4)
-            newObj.Destroy();
     });
+
+    AddTimeout( newObj, 2 );
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.Damage(1);
         newObj.Destroy();
+        
+        var pos = newObj.GetPosition();
+        for( var i = 0; i < 16; ++i ) {
+            
+            var objSprite = g_GameManager.SpawnObject("sprite-test", true);
+            objSprite.SetPosition( pos.x, pos.y );
+            
+            var angle = THREE.Math.randFloat(0, 3.14 * 2);
+            var vecDir = new THREE.Vector3( 1, 0, 0 );
+            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+            vecDir.multiplyScalar( THREE.Math.randFloat(0.1, 0.25) );
+            
+            objSprite.SetVelocity( vecDir.x, vecDir.y );
+            AddTimeout( objSprite, 0.25 );
+            AddScaleOverTime( objSprite, 0.1, 0.6, 0.25 );
+            
+        }
     });
 
     return newObj;
@@ -247,13 +283,11 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
 
     newObj.m_3DObject.rotation.z = 3.14;
 
-    var deathTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, -1);
-        deathTimer += _fDT;
-        if (deathTimer > 4)
-            newObj.Destroy();
     });
+
+    AddTimeout( newObj, 4 );
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.Damage(1);
@@ -267,7 +301,7 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
 
-    newObj.m_nHealth = 1;
+    newObj.m_nHealth = 3;
     var fireTimer = 0;
     var mode = "left";
     newObj.AddUpdateCallback(function(_fDT) {

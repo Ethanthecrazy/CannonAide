@@ -33,7 +33,9 @@
 		"mat_sprite_test": {
 			"type": "SpriteMaterial",
 			"params": {
-				"map": "cubetex.png"
+				"map": "cubetex.png",
+				"transparent": true,
+				"opacity": 0.5
 			}
 		}
 	}

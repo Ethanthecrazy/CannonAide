@@ -192,6 +192,7 @@ function GameManager() {
     this.m_ObjectTamplates = {};
     this.m_Collisions = [];
     this.m_GameObjects = [];
+    this.m_GameProps = [];
 }
 
 //==============================================================================
@@ -240,7 +241,7 @@ GameManager.prototype.AddObjectFunction = function(_name, _funcCreate) {
 };
 
 //==============================================================================
-GameManager.prototype.SpawnObject = function(_name) {
+GameManager.prototype.SpawnObject = function(_name, _isProp) {
     
     var d3Object = null;
     var templateObject = this.m_ObjectTamplates[_name];
@@ -264,7 +265,13 @@ GameManager.prototype.SpawnObject = function(_name) {
         gameObject = new GameObject(d3Object, this.GetColliders(_name));
     }
 
-    this.m_GameObjects.push(gameObject);
+    if( _isProp ) {
+        this.m_GameProps.push(gameObject);
+    }
+    else {
+        this.m_GameObjects.push(gameObject);
+    }
+    
     return gameObject;
 };
 
@@ -287,6 +294,10 @@ GameManager.prototype.Update = function() {
             currentValue.FixedUpdate(FIXED_TIMESTEP);
         });
 
+        this.m_GameProps.forEach(function(currentValue, index, array) {
+            currentValue.FixedUpdate(FIXED_TIMESTEP);
+        });
+        
         for (var i = 0; i < this.m_GameObjects.length; ++i) {
             var firstObject = this.m_GameObjects[i];
 
@@ -310,6 +321,10 @@ GameManager.prototype.Update = function() {
     }
 
     this.m_GameObjects.forEach(function(currentValue, index, array) {
+        currentValue.Update(dt);
+    });
+    
+    this.m_GameProps.forEach(function(currentValue, index, array) {
         currentValue.Update(dt);
     });
 };
@@ -375,12 +390,24 @@ GameManager.prototype.DoCollision = function(_object1, _collider1, _object2, _co
 
 //==============================================================================
 GameManager.prototype.RemoveGameObject = function(_object) {
-    this.m_GameObjects.splice(this.m_GameObjects.indexOf(_object), 1);
+    
+    var objIndex = this.m_GameObjects.indexOf(_object);
+    if( objIndex > -1 ) {
+        this.m_GameObjects.splice( objIndex, 1);
+    }
+    
+    var propIndex = this.m_GameProps.indexOf(_object);
+    if( propIndex > -1 ) {
+        this.m_GameProps.splice( propIndex, 1);
+    }
 };
 
 GameManager.prototype.DestroyAll = function() {
     while (this.m_GameObjects.length > 0)
         this.m_GameObjects[0].Destroy();
+        
+    while (this.m_GameProps.length > 0)
+        this.m_GameProps[0].Destroy();
 };
 
 if (!window.engine)
