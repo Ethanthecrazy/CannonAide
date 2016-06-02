@@ -1,14 +1,40 @@
 {
-	"meshes": [
-		{ "name": "mesh_player",	"path": "player/player.obj" },
-		{ "name": "mesh_pbullet",	"path": "player/pbullet.obj" },
-		{ "name": "mesh_cube",		"path": "cube.obj" },
-		{ "name": "mesh_sphere",	"path": "sphere/sphere.obj" }
-	],
-	"textures": [
-		{ "name": "tex_player", 	"path": "player/player.png" },
-		{ "name": "tex_pbullet",	"path": "player/PBulletDiffuse.png" },
-		{ "name": "tex_cube",		"path": "cubetex.png" },
-		{ "name": "tex_sphere",		"path": "sphere/sphere.png" }
-	]
+	"meshes": {
+		"mesh_player": "player/player.obj",
+		"mesh_pbullet": "player/pbullet.obj",
+		"mesh_cube": "cube.obj",
+		"mesh_sphere": "sphere/sphere.obj"
+	},
+	"materials": {
+		"mat_player": {
+			"type": "MeshLambertMaterial",
+			"params": {
+				"map": "player/player.png"
+			}
+		},
+		"mat_pbullet": {
+			"type": "MeshPhongMaterial",
+			"params": {
+				"map": "player/PBulletDiffuse.png"
+			}
+		},
+		"mat_cube": {
+			"type": "MeshPhongMaterial",
+			"params": {
+				"map": "cubetex.png"
+			}
+		},
+		"mat_sphere": {
+			"type": "MeshLambertMaterial",
+			"params": {
+				"map": "sphere/sphere.png"
+			}
+		},
+		"mat_sprite_test": {
+			"type": "SpriteMaterial",
+			"params": {
+				"map": "cubetex.png"
+			}
+		}
+	}
 }

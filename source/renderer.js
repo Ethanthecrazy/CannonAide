@@ -42,15 +42,12 @@ function Renderer() {
     directionalLight.position.set(0, 0, 1);
     this.m_3Scene.add(directionalLight);
 
-    this.m_3LoadManager.onLoad = function() {
-        this.onLoad();
-    }.bind(this);
-
     // Start up the geometry loader
     this.m_3OBJLoader = new THREE.OBJLoader(this.m_3LoadManager);
     this.m_3Textureloader = new THREE.TextureLoader(this.m_3LoadManager);
 
     this.m_3Geos = {};
+    this.m_3Textures = {};
     this.m_3Materials = {};
     this.m_3RenderObjects = {};
 }
@@ -114,46 +111,64 @@ Renderer.prototype.Load = function(_path) {
     $.getJSON(_path, function(_Index) {
 
         var loadMeshes = _Index["meshes"];
-        for (var meshIdx in loadMeshes) {
-            var currMesh = loadMeshes[meshIdx];
-            that.LoadGeometry(currMesh["name"], currMesh["path"]);
+        for (var meshName in loadMeshes) {
+            that.LoadGeometry(meshName, loadMeshes[meshName]);
         }
-        
-        var loadTextures = _Index["textures"];
-        for (var texIdx in loadTextures) {
-            var currTex = loadTextures[texIdx];
-            that.LoadMaterial(currTex["name"], currTex["path"]);
+
+        var loadMaterials = _Index["materials"];
+        for (var matName in loadMaterials) {
+            var currMat = loadMaterials[matName];
+
+            if (currMat["params"] && currMat["params"]["map"]) {
+                that.LoadTexture(currMat["params"]["map"]);
+            }
         }
-        
-    }).fail( function() {
-       console.log( "Failed to load '" + _path + "'." ); 
+
+        that.m_3LoadManager.onLoad = function() {
+            this.CreateMaterials(_Index["materials"]);
+            this.onLoad();
+        }.bind(that);
+
+    }).fail(function() {
+        console.log("Failed to load '" + _path + "'.");
     });
 };
 
 //==============================================================================
-Renderer.prototype.LoadMaterial = function( _name, _path) {
+Renderer.prototype.LoadTexture = function(_path) {
 
-    if (this.m_3Materials[_path] != null) {
+    if (this.m_3Textures[_path] != null) {
         return;
     }
 
     var that = this;
     this.m_3Textureloader.load("resources/" + _path, function(texture) {
 
-        var material = new THREE.MeshLambertMaterial({
-            color: 'white',
-            map: texture
-        });
-
-        that.m_3Materials[_name] = material;
+        that.m_3Textures[_path] = texture;
 
     }, this.onProgress, this.onError);
-
-    this.m_3Materials[_path] = "loading";
+    
+    this.m_3Textures[_path] = true;
 };
 
 //==============================================================================
-Renderer.prototype.LoadGeometry = function( _name, _path) {
+Renderer.prototype.CreateMaterials = function(_matDefs) {
+
+    for (var matName in _matDefs) {
+        var currMat = _matDefs[matName];
+
+        if (!THREE[currMat["type"]]) {
+            console.log("Could not locate '" + currMat["type"] + "' material.");
+            continue;
+        }
+
+        currMat["params"]["map"] = this.m_3Textures[currMat["params"]["map"]];
+        this.m_3Materials[matName] = new THREE[currMat["type"]](currMat["params"]);
+    }
+};
+
+//==============================================================================
+Renderer.prototype.LoadGeometry = function(_name, _path) {
 
     if (this.m_3Geos[_path] != null) {
         return;
@@ -208,22 +223,28 @@ Renderer.prototype.Render = function() {
 
 //==============================================================================
 Renderer.prototype.CreateRenderObject = function(_geoName, _texName) {
-    
+
+    var sourceMat = this.m_3Materials[_texName];
     var sourceGeo = this.m_3Geos[_geoName];
-    if( !sourceGeo ) {
-        return null;
-    }
         
-    var sourceTex = this.m_3Materials[_texName];
-    if( !sourceTex ) {
-        return null;
+    if (!sourceMat) {
+        sourceMat = new THREE.MeshNormalMaterial();
+        if( _texName ) {
+            console.log( "Could not find a material called '" + _texName + "'." );
+        }
     }
     
     var newObject = new THREE.Object3D();
-    var newMesh = new THREE.Mesh(sourceGeo, sourceTex);
     
-    newObject.add(newMesh);
-
+    if( sourceMat instanceof THREE.SpriteMaterial ) {
+        var newSprite = new THREE.Sprite( sourceMat );
+        newSprite.position.z = 16;
+        newObject.add( newSprite );
+    }
+    else if( sourceGeo ) {
+        newObject.add(new THREE.Mesh(sourceGeo, sourceMat));
+    }
+    
     /*var material = new THREE.LineBasicMaterial({
         color: 0xffffff
     });

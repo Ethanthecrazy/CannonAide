@@ -16,6 +16,8 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
 
     g_Player = g_GameManager.SpawnObject("player");
     g_Player.SetPosition(0, -16);
+    
+    g_GameManager.SpawnObject("sprite-test");
 
     var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {

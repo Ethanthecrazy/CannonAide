@@ -247,7 +247,7 @@ GameManager.prototype.SpawnObject = function(_name) {
     var gameObject = null;
     
     if( templateObject ) {
-        d3Object = window.engine.Renderer.CreateRenderObject( templateObject["mesh"], templateObject["texture"] );
+        d3Object = window.engine.Renderer.CreateRenderObject( templateObject["mesh"], templateObject["material"] );
     }
     else {
         console.log( "No object template found for '" + _name + "'.");

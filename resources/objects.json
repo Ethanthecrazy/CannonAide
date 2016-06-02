@@ -2,21 +2,21 @@
 	"objects": {
 		"player": {
 		    "mesh": "mesh_player",
-		    "texture": "tex_player",
+		    "material": "mat_player",
 			"colliders":[ 
 				{ "layer": "player", "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
 			]
 		},
 		"p-bullet": {
 		    "mesh": "mesh_pbullet",
-		    "texture": "tex_pbullet",
+		    "material": "mat_pbullet",
 			"colliders":[ 
 				{ "layer": "p-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
 		},
 		"debris": {
 		    "mesh": "mesh_cube",
-		    "texture": "tex_cube",
+		    "material": "mat_cube",
 			"colliders":[ 
 				{ "layer": "enemy", "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
@@ -43,17 +43,21 @@
 		},
 		"sphere": {
 		    "mesh": "mesh_sphere",
-		    "texture": "tex_sphere",
+		    "material": "mat_sphere",
 			"colliders":[ 
 				{ "layer": "enemy", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -0.5 }
 			]
 		},
 		"e-bullet": {
 		    "mesh": "mesh_pbullet",
-		    "texture": "tex_pbullet",
+		    "material": "mat_pbullet",
 			"colliders":[ 
 				{ "layer": "e-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
+		},
+		"sprite-test": {
+			"material": "mat_sprite_test",
+			"colliders":[]
 		}
 	}
 }
