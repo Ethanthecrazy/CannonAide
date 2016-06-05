@@ -11,7 +11,7 @@ function AddTimeout( _gameObject, _time ) {
     _gameObject.AddUpdateCallback(function(_fDT) {
         deathTimer += _fDT;
         if (deathTimer > _time)
-            g_GameManager.Destroy( _gameObject );
+            g_GameManager.Destroy( _gameObject, true );
     });
 }
 
@@ -35,15 +35,18 @@ function AddDestroyParticle( _gameObject, _matName, _count, _duration, _startSca
     _gameObject.AddDestroyCallback( function() {
         
         var pos = _gameObject.GetPosition();
+        var radCount = 0;
         for( var i = 0; i < _count; ++i ) {
             
             var objSprite = g_GameManager.SpawnObject(_matName, true);
             objSprite.SetPosition( pos.x, pos.y );
             
-            var angle = THREE.Math.randFloat(0, 3.14 * 2);
+            radCount += THREE.Math.randFloat(0, 3.14 / 2);
             var vecDir = new THREE.Vector3( 1, 0, 0 );
-            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-            vecDir.multiplyScalar( THREE.Math.randFloat(0.1, 0.25) );
+            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), radCount);
+            vecDir.multiplyScalar( THREE.Math.randFloat(0.05, 0.25) );
+            
+            objSprite.m_3DObject.rotation.z = THREE.Math.randFloat(0, 3.14 * 2);
             
             objSprite.SetVelocity( vecDir.x, vecDir.y );
             AddTimeout( objSprite, _duration );
@@ -105,7 +108,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
         if( entranceTimer < 1.5 ) {
             
             entranceTimer += _fDT;
-            var percent = THREE.Math.smoothstep( entranceTimer, 0, 1.5 );
+            var percent = THREE.Math.smootherstep( entranceTimer, 0, 1.5 );
             newObj.SetPosition( 0, -40 + percent * 24 );
             newObj.SetVelocity( 0, 0 );
             return;
@@ -171,7 +174,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     });
 
-    AddDestroyParticle( newObj, "sprite-test", 32, 2.5, 1, 4);
+    AddDestroyParticle( newObj, "sprite-test", 32, 2, 1, 8);
     
     newObj.AddDestroyCallback(function() {
         setTimeout(function() {
@@ -181,6 +184,9 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     });
 
+
+    g_GameManager.SpawnObject("player-heart");
+    
     return newObj;
 });
 
@@ -199,7 +205,7 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
         g_GameManager.Destroy(newObj);
     });
     
-    AddDestroyParticle( newObj, "sprite-test", 16, 0.25, 0.1, 0.6);
+    AddDestroyParticle( newObj, "part-spark", 16, 0.25, 0.6, 1.2);
 
     return newObj;
 });
@@ -313,7 +319,7 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
         g_GameManager.Destroy(newObj);
     });
 
-    AddDestroyParticle( newObj, "sprite-test", 16, 0.25, 0.1, 0.6);
+    AddDestroyParticle( newObj, "part-spark", 16, 0.25, 0.6, 1.2);
     
     return newObj;
 });
@@ -351,10 +357,10 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
                 newObj.AddVelocity(0, 1 * _fDT);
             }
             else {
-                if (objPos.x - 0.5 < bottomLeft.x) {
+                if (objPos.x - 0.5 < bottomLeft.x + 7) {
                     mode = "right";
                 }
-                if (objPos.x + 0.5 > topRight.x) {
+                if (objPos.x + 0.5 > topRight.x - 7) {
                     mode = "left";
                 }
 

@@ -127,6 +127,7 @@ GameObject.prototype.GetCollider = function(_nIndex) {
     var newBox = new THREE.Box2(v2Min, v2Max);
     // decoreate the box
     newBox.layer = collSource["layer"];
+    newBox.parent = this;
 
     return newBox;
 };
@@ -172,7 +173,7 @@ function GameManager() {
     this.m_ObjectTamplates = {};
     this.m_Collisions = [];
     this.m_GameObjects = [];
-    this.m_GameProps = [];
+    this.m_ColliderLayers = {};
     this.m_DestroyQueue = [];
 }
 
@@ -222,7 +223,7 @@ GameManager.prototype.AddObjectFunction = function(_name, _funcCreate) {
 };
 
 //==============================================================================
-GameManager.prototype.SpawnObject = function(_name, _isProp) {
+GameManager.prototype.SpawnObject = function(_name) {
 
     var d3Object = null;
     var templateObject = this.m_ObjectTamplates[_name];
@@ -246,12 +247,19 @@ GameManager.prototype.SpawnObject = function(_name, _isProp) {
         gameObject = new GameObject(d3Object, this.GetColliders(_name));
     }
 
-    if (_isProp) {
-        this.m_GameProps.push(gameObject);
+    for (var i = 0; i < gameObject.GetColliderCount(); ++i) {
+        var currColl = gameObject.GetCollider(i);
+
+        var layerArray = this.m_ColliderLayers[currColl.layer];
+        if (!layerArray) {
+            layerArray = [];
+            this.m_ColliderLayers[currColl.layer] = layerArray;
+        }
+
+        layerArray.push( { object: gameObject, index: i } );
     }
-    else {
-        this.m_GameObjects.push(gameObject);
-    }
+
+    this.m_GameObjects.push(gameObject);
 
     return gameObject;
 };
@@ -263,16 +271,19 @@ GameManager.prototype.Update = function() {
     while (this.m_DestroyQueue.length > 0) {
         var currDestroy = this.m_DestroyQueue[0];
 
-        for (var itr in currDestroy.m_onDestroyCallbacks) {
-            currDestroy.m_onDestroyCallbacks[itr]();
+        if (!currDestroy.gmpQuiteDeath) {
+            for (var itr in currDestroy.m_onDestroyCallbacks) {
+                currDestroy.m_onDestroyCallbacks[itr]();
+            }
         }
+
 
         if (currDestroy.m_3DObject) {
             window.engine.Renderer.Remove3DObject(currDestroy.m_3DObject);
         }
 
         this.RemoveGameObject(currDestroy);
-        
+
         this.m_DestroyQueue.shift();
     }
 
@@ -293,26 +304,24 @@ GameManager.prototype.Update = function() {
             currentValue.FixedUpdate(FIXED_TIMESTEP);
         });
 
-        this.m_GameProps.forEach(function(currentValue, index, array) {
-            currentValue.FixedUpdate(FIXED_TIMESTEP);
-        });
+        for (var c = 0; c < this.m_Collisions.length; ++c) {
+            var currCollision = this.m_Collisions[c];
 
-        for (var i = 0; i < this.m_GameObjects.length; ++i) {
-            var firstObject = this.m_GameObjects[i];
+            var firstLayer = this.m_ColliderLayers[currCollision[0]];
+            var secondLayer = this.m_ColliderLayers[currCollision[1]];
 
-            for (var n = i + 1; n < this.m_GameObjects.length; ++n) {
-                var secondObject = this.m_GameObjects[n];
+            if( !firstLayer || !secondLayer )
+                continue;
+                
+            for (var i = 0; i < firstLayer.length; ++i) {
+                var firstCollider = firstLayer[i].object.GetCollider( firstLayer[i].index );
 
-                for (var v = 0; v < firstObject.GetColliderCount(); ++v) {
-                    var firstCollider = firstObject.GetCollider(v);
+                for (var n = 0; n < secondLayer.length; ++n) {
+                    var secondCollider = secondLayer[n].object.GetCollider( secondLayer[n].index );
 
-                    for (var k = 0; k < secondObject.GetColliderCount(); ++k) {
-                        var secondCollider = secondObject.GetCollider(k);
-
-                        if (this.DoCollision(firstObject, firstCollider, secondObject, secondCollider)) {
-                            firstObject.onCollision(secondObject);
-                            secondObject.onCollision(firstObject);
-                        }
+                    if (this.DoCollision(firstCollider.parent, firstCollider, secondCollider.parent, secondCollider)) {
+                        firstCollider.parent.onCollision(secondCollider.parent);
+                        secondCollider.parent.onCollision(firstCollider.parent);
                     }
                 }
             }
@@ -322,32 +331,6 @@ GameManager.prototype.Update = function() {
     this.m_GameObjects.forEach(function(currentValue, index, array) {
         currentValue.Update(dt);
     });
-
-    this.m_GameProps.forEach(function(currentValue, index, array) {
-        currentValue.Update(dt);
-    });
-};
-
-//==============================================================================
-GameManager.prototype.DoesCollide = function(_firstLayer, _secondLayer) {
-
-    var foundMatch = false;
-    var that = this;
-
-    that.m_Collisions.forEach(function(currColl) {
-        var tempColl = currColl.slice();
-        var firstIndex = tempColl.indexOf(_firstLayer);
-
-        if (firstIndex > -1) {
-            tempColl.splice(firstIndex, 1);
-
-            if (tempColl.includes(_secondLayer)) {
-                foundMatch = true;
-            }
-        }
-    });
-
-    return foundMatch;
 };
 
 //==============================================================================
@@ -356,9 +339,8 @@ GameManager.prototype.DoCollision = function(_object1, _collider1, _object2, _co
     if (!_collider1 || !_collider2)
         return false;
 
-    if (!this.DoesCollide(_collider1["layer"], _collider2["layer"])) {
+    if (Object.is(_object1, _object2))
         return false;
-    }
 
     if (_collider1.intersectsBox(_collider2)) {
 
@@ -387,35 +369,41 @@ GameManager.prototype.DoCollision = function(_object1, _collider1, _object2, _co
     return false;
 };
 
-GameManager.prototype.Destroy = function(_object) {
-    if( !this.m_DestroyQueue.includes(_object) ) {
+GameManager.prototype.Destroy = function(_object, _isQuiet) {
+    if (!this.m_DestroyQueue.includes(_object)) {
+
+        if (_isQuiet)
+            _object.gmpQuiteDeath = true;
+
         this.m_DestroyQueue.push(_object);
     }
 };
 
 GameManager.prototype.DestroyAll = function() {
-    
-    var that = this;
-    this.m_GameObjects.forEach( function( currObj ) {
-        that.Destroy( currObj );
-    }); 
 
-    this.m_GameProps.forEach( function( currProp ) {
-        that.Destroy( currProp );
+    var that = this;
+    this.m_GameObjects.forEach(function(currObj) {
+        that.Destroy(currObj, true);
     });
 };
 
 //==============================================================================
 GameManager.prototype.RemoveGameObject = function(_object) {
 
+    for (var i = 0; i < _object.GetColliderCount(); ++i) {
+        var currColl = _object.GetCollider(i);
+
+        var currLayer = this.m_ColliderLayers[currColl.layer];
+        var index = currLayer.findIndex( function(element, index, array){
+            return Object.is( element.object, _object ) && element.index == i;
+        });
+        
+        currLayer.splice( index, 1);
+    }
+
     var objIndex = this.m_GameObjects.indexOf(_object);
     if (objIndex > -1) {
         this.m_GameObjects.splice(objIndex, 1);
-    }
-
-    var propIndex = this.m_GameProps.indexOf(_object);
-    if (propIndex > -1) {
-        this.m_GameProps.splice(propIndex, 1);
     }
 };
 

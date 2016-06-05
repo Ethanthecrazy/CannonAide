@@ -27,14 +27,15 @@
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
 
+    var time = (new Date()).getTime();
     var canvas = document.getElementById("viewport");
-    window.engine.InputManager.Init( canvas );
+    window.engine.InputManager.Init(canvas);
 
     window.engine.Renderer.Init(canvas);
-    window.engine.Renderer.Load("resources/index.json");
+    window.engine.Renderer.Load("resources/index.json?t=" + time);
     window.engine.Renderer.onLoad = function() {
 
-      window.engine.GameManager.Load("resources/objects.json", "resources/collisions.json");
+      window.engine.GameManager.Load("resources/objects.json?t=" + time, "resources/collisions.json?t=" + time);
       window.engine.GameManager.onload = function() {
 
         window.engine.GameManager.Start();
@@ -54,28 +55,27 @@
       window.engine.Renderer.Render();
       stats.end();
     }
-    
+
     var offsetCounter = 40;
 
     var oldLog = console.log;
     var customLog = function(message) {
-    
-        var text2 = document.createElement('div');
-        text2.style.position = 'absolute';
-            //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-        text2.style.width = 100;
-        text2.style.height = 100;
-        text2.style.color = "white";
-        text2.innerHTML = message;
-        offsetCounter += 20;
-        text2.style.top = offsetCounter + 'px';
-        text2.style.left = 20 + 'px';
-        document.body.appendChild(text2);
-    
-        oldLog.apply(console, arguments);
+
+      var text2 = document.createElement('div');
+      text2.style.position = 'absolute';
+      //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+      text2.style.width = 100;
+      text2.style.height = 100;
+      text2.style.color = "white";
+      text2.innerHTML = message;
+      offsetCounter += 20;
+      text2.style.top = offsetCounter + 'px';
+      text2.style.left = 20 + 'px';
+      document.body.appendChild(text2);
+
+      oldLog.apply(console, arguments);
     };
     //console.log = customLog;
-    
   </script>
 
 </body>

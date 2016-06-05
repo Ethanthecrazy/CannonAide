@@ -56,8 +56,16 @@
 			]
 		},
 		"sprite-test": {
-			"material": "mat_sprite_test",
+			"material": "mat_part_dust",
 			"colliders":[]
+		},
+		"part-spark": {
+			"material": "mat_part_spark",
+			"colliders":[]
+		},
+		"player-heart": {
+			"material": "mat_heart",
+			"colliders": []
 		}
 	}
 }

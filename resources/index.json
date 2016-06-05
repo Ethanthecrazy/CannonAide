@@ -30,12 +30,26 @@
 				"map": "sphere/sphere.png"
 			}
 		},
-		"mat_sprite_test": {
+		"mat_part_dust": {
 			"type": "SpriteMaterial",
 			"params": {
-				"map": "cubetex.png",
+				"map": "particle/dust.png",
+				"transparent": true
+			}
+		},
+		"mat_part_spark": {
+			"type": "SpriteMaterial",
+			"params": {
+				"map": "particle/spark.png",
 				"transparent": true,
-				"opacity": 0.5
+				"color": "rgb(100, 160, 200)"
+			}
+		},
+		"mat_heart": {
+			"type": "SpriteMaterial",
+			"params": {
+				"map": "player/heart.png",
+				"transparent": true
 			}
 		}
 	}
