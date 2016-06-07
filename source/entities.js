@@ -5,24 +5,24 @@ var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
 
-function AddTimeout( _gameObject, _time ) {
-    
+function AddTimeout(_gameObject, _time) {
+
     var deathTimer = 0;
     _gameObject.AddUpdateCallback(function(_fDT) {
         deathTimer += _fDT;
         if (deathTimer > _time)
-            g_GameManager.Destroy( _gameObject, true );
+            g_GameManager.Destroy(_gameObject, true);
     });
 }
 
-function AddScaleOverTime( _gameObject, _minScale, _maxScale, _duration ) {
-    
+function AddScaleOverTime(_gameObject, _minScale, _maxScale, _duration) {
+
     var scaleTimer = 0;
     _gameObject.AddUpdateCallback(function(_fDT) {
         scaleTimer += _fDT;
         if (scaleTimer < _duration) {
-            var percent = THREE.Math.smoothstep( scaleTimer, 0, _duration );
-            var currScale = _minScale + percent * ( _maxScale - _minScale  );
+            var percent = THREE.Math.smoothstep(scaleTimer, 0, _duration);
+            var currScale = _minScale + percent * (_maxScale - _minScale);
             _gameObject.m_3DObject.scale.x = currScale;
             _gameObject.m_3DObject.scale.y = currScale;
             _gameObject.m_3DObject.children[0].material.opacity = 1 - percent;
@@ -30,27 +30,27 @@ function AddScaleOverTime( _gameObject, _minScale, _maxScale, _duration ) {
     });
 }
 
-function AddDestroyParticle( _gameObject, _matName, _count, _duration, _startScale, _stopScale ) {
-    
-    _gameObject.AddDestroyCallback( function() {
-        
+function AddDestroyParticle(_gameObject, _matName, _count, _duration, _startScale, _stopScale) {
+
+    _gameObject.AddDestroyCallback(function() {
+
         var pos = _gameObject.GetPosition();
         var radCount = 0;
-        for( var i = 0; i < _count; ++i ) {
-            
+        for (var i = 0; i < _count; ++i) {
+
             var objSprite = g_GameManager.SpawnObject(_matName, true);
-            objSprite.SetPosition( pos.x, pos.y );
-            
+            objSprite.SetPosition(pos.x, pos.y);
+
             radCount += THREE.Math.randFloat(0, 3.14 / 2);
-            var vecDir = new THREE.Vector3( 1, 0, 0 );
+            var vecDir = new THREE.Vector3(1, 0, 0);
             vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), radCount);
-            vecDir.multiplyScalar( THREE.Math.randFloat(0.05, 0.25) );
-            
+            vecDir.multiplyScalar(THREE.Math.randFloat(0.05, 0.25));
+
             objSprite.m_3DObject.rotation.z = THREE.Math.randFloat(0, 3.14 * 2);
-            
-            objSprite.SetVelocity( vecDir.x, vecDir.y );
-            AddTimeout( objSprite, _duration );
-            AddScaleOverTime( objSprite, _startScale, _stopScale, _duration );
+
+            objSprite.SetVelocity(vecDir.x, vecDir.y);
+            AddTimeout(objSprite, _duration);
+            AddScaleOverTime(objSprite, _startScale, _stopScale, _duration);
         }
     });
 }
@@ -69,7 +69,7 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
         fSpawnTimer += _fDT;
-        if (fSpawnTimer > 3) {
+        if (fSpawnTimer > 1) {
 
             var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0);
             var topRight = window.engine.Renderer.ScreenToGamePoint(1, 1);
@@ -99,18 +99,35 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
 
     newObj.m_nHealth = 3;
+    var counterRecharge = 0;
+    var counterTimer = 0;
 
     var fireTimer = 1;
     var entranceTimer = 0;
+    var touchLastFrame = false;
 
     newObj.AddUpdateCallback(function(_fDT) {
 
-        if( entranceTimer < 1.5 ) {
-            
+        var fullChargeBuff = 0;
+        if( counterRecharge > 5 ) {
+            fullChargeBuff += 0.1;    
+        }
+        
+        var botRatio = THREE.Math.smootherstep(counterRecharge, 0, 5 / 3);
+        newObj.m_3DObject.children[1].material.color = new THREE.Color(0.1 * botRatio + fullChargeBuff, 0.2 * botRatio + fullChargeBuff, 0.3 * botRatio + fullChargeBuff);
+
+        var midRatio = THREE.Math.smootherstep(counterRecharge, 5 / 3, 5 / 3 * 2);
+        newObj.m_3DObject.children[2].material.color = new THREE.Color(0.2 * midRatio + fullChargeBuff, 0.4 * midRatio + fullChargeBuff, 0.6 * midRatio + fullChargeBuff);
+
+        var topRatio = THREE.Math.smootherstep(counterRecharge, 5 / 3 * 2, 5);
+        newObj.m_3DObject.children[3].material.color = new THREE.Color(0.3 * topRatio + fullChargeBuff, 0.6 * topRatio + fullChargeBuff, 0.9 * topRatio + fullChargeBuff);
+
+        if (entranceTimer < 1.5) {
+
             entranceTimer += _fDT;
-            var percent = THREE.Math.smootherstep( entranceTimer, 0, 1.5 );
-            newObj.SetPosition( 0, -40 + percent * 24 );
-            newObj.SetVelocity( 0, 0 );
+            var percent = THREE.Math.smootherstep(entranceTimer, 0, 1.5);
+            newObj.SetPosition(0, -40 + percent * 24);
+            newObj.SetVelocity(0, 0);
             return;
         }
 
@@ -145,12 +162,24 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             newObj.SetVelocity(0, 0);
 
         if (g_InputManager.GetTouchCount() > 0) {
+
             var touch = g_InputManager.GetTouch(0);
             var gamePoint = window.engine.Renderer.ScreenToGamePoint(touch.x, 1 - touch.y);
             gamePoint.y += 6.4 + 3.2;
             var toPoint = gamePoint.sub(newObj.GetPosition());
-            toPoint.clampLength(-1, 1);
+            toPoint.clampLength(-1.5, 1.5);
             newObj.AddVelocity(toPoint.x, toPoint.y);
+            touchLastFrame = true;
+        }
+        else {
+
+            if (counterRecharge > 5 && touchLastFrame == true) {
+                counterRecharge = 0;
+                counterTimer = 0;
+                console.log("Counter!");
+            }
+
+            touchLastFrame = false;
         }
 
         fireTimer += _fDT;
@@ -166,16 +195,27 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             }
         }
 
-        newObj.m_3DObject.rotation.y = newObj.GetVelocity().x * 0.75;
-        newObj.m_3DObject.rotation.x = newObj.GetVelocity().y * -0.75;
+        newObj.m_3DObject.rotation.y = newObj.GetVelocity().x * 0.5;
+        newObj.m_3DObject.rotation.x = newObj.GetVelocity().y * -0.5;
+
+
+        counterRecharge += _fDT;
+        counterTimer += _fDT;
     });
 
     newObj.AddCollisionCallback(function(_otherObj) {
 
+        if (_otherObj.layer == "e-bullet" && counterTimer < 0.5) {
+            var newBullet = window.engine.GameManager.SpawnObject("p-counter-bullet");
+            var sourcePos = _otherObj.parent.GetPosition();
+            var sourceVel = newObj.GetVelocity();
+            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
+            newBullet.damageAmount = 3;
+        }
     });
 
-    AddDestroyParticle( newObj, "sprite-test", 32, 2, 1, 8);
-    
+    AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
+
     newObj.AddDestroyCallback(function() {
         setTimeout(function() {
             g_GameManager.DestroyAll();
@@ -184,9 +224,16 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     });
 
+    var oldDamage = newObj.Damage.bind(newObj);
+    newObj.Damage = function(_amount) {
+        if (counterTimer > 0.5) {
+            oldDamage(_amount);
+        }
+    };
 
-    g_GameManager.SpawnObject("player-heart");
-    
+    newObj.m_3DObject.children[1].position.z = 0.3;
+    newObj.m_3DObject.children[2].position.z = 0.2;
+    newObj.m_3DObject.children[3].position.z = 0.1;
     return newObj;
 });
 
@@ -198,18 +245,35 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
         newObj.SetVelocity(0, 2);
     });
 
-    AddTimeout( newObj, 2 );
+    AddTimeout(newObj, 2);
 
     newObj.AddCollisionCallback(function(_otherObj) {
-        _otherObj.Damage(1);
+        _otherObj.parent.Damage(1);
         g_GameManager.Destroy(newObj);
     });
-    
-    AddDestroyParticle( newObj, "part-spark", 16, 0.25, 0.6, 1.2);
+
+    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.2);
 
     return newObj;
 });
 
+window.engine.GameManager.AddObjectFunction("p-counter-bullet", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-counter-bullet"));
+
+    newObj.AddUpdateCallback(function(_fDT) {
+        newObj.SetVelocity(0, 0);
+    });
+
+    AddTimeout(newObj, 0.5);
+
+    newObj.AddCollisionCallback(function(_otherObj) {
+        if (newObj.damageAmount)
+            _otherObj.parent.Damage(newObj.damageAmount);
+    });
+
+    return newObj;
+});
 window.engine.GameManager.AddObjectFunction("debris", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("debris"));
@@ -307,20 +371,21 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("e-bullet"));
 
     newObj.m_3DObject.rotation.z = 3.14;
+    newObj.m_nHealth = 1;
 
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, -1);
     });
 
-    AddTimeout( newObj, 4 );
+    AddTimeout(newObj, 4);
 
     newObj.AddCollisionCallback(function(_otherObj) {
-        _otherObj.Damage(1);
+        _otherObj.parent.Damage(1);
         g_GameManager.Destroy(newObj);
     });
 
-    AddDestroyParticle( newObj, "part-spark", 16, 0.25, 0.6, 1.2);
-    
+    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.2);
+
     return newObj;
 });
 
@@ -353,7 +418,7 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
             if (objPos.y + 0.5 > topRight.y) {
                 newObj.AddVelocity(0, -1 * _fDT);
             }
-            else if(objPos.y - 0.5 < 0) {
+            else if (objPos.y - 0.5 < 0) {
                 newObj.AddVelocity(0, 1 * _fDT);
             }
             else {
@@ -377,8 +442,8 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
             }
         }
     });
-    
-    AddDestroyParticle( newObj, "sprite-test", 16, 0.5, 1, 2);
-    
+
+    AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
+
     return newObj;
 });

@@ -1,7 +1,9 @@
 {
     "collisions": [
         [ "barrier",    "player"    ], 
-        [ "p-bullet",   "enemy"     ], 
+        [ "p-bullet",   "enemy"     ],
+        [ "pc-bullet",  "enemy"     ],
+        [ "pc-bullet",  "e-bullet"  ],
         [ "player",     "e-bullet"  ],
         [ "player",     "enemy"     ]
     ]

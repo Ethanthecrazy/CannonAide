@@ -112,7 +112,11 @@ GameObject.prototype.AddCollider = function(_collider) {
 
 //==============================================================================
 GameObject.prototype.GetColliderCount = function() {
-    return this.m_3Colliders.length;
+    
+    if( this.m_3Colliders )
+        return this.m_3Colliders.length;
+    
+    return 0;
 };
 
 //==============================================================================
@@ -230,10 +234,10 @@ GameManager.prototype.SpawnObject = function(_name) {
     var gameObject = null;
 
     if (templateObject) {
-        d3Object = window.engine.Renderer.CreateRenderObject(templateObject["mesh"], templateObject["material"]);
+        d3Object = window.engine.Renderer.CreateRenderObject(templateObject["elements"]);
     }
     else {
-        console.log("No object template found for '" + _name + "'.");
+        console.warn("No object template found for '" + _name + "'.");
     }
 
     if (this.m_CreateFunctions[_name]) {
@@ -320,8 +324,8 @@ GameManager.prototype.Update = function() {
                     var secondCollider = secondLayer[n].object.GetCollider( secondLayer[n].index );
 
                     if (this.DoCollision(firstCollider.parent, firstCollider, secondCollider.parent, secondCollider)) {
-                        firstCollider.parent.onCollision(secondCollider.parent);
-                        secondCollider.parent.onCollision(firstCollider.parent);
+                        firstCollider.parent.onCollision(secondCollider);
+                        secondCollider.parent.onCollision(firstCollider);
                     }
                 }
             }

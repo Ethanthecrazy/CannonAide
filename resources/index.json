@@ -3,7 +3,10 @@
 		"mesh_player": "player/player.obj",
 		"mesh_pbullet": "player/pbullet.obj",
 		"mesh_cube": "cube.obj",
-		"mesh_sphere": "sphere/sphere.obj"
+		"mesh_sphere": "sphere/sphere.obj",
+		"mesh_counter_bot": "player/bot-light.obj",
+		"mesh_counter_mid": "player/mid-light.obj",
+		"mesh_counter_top": "player/top-light.obj"
 	},
 	"materials": {
 		"mat_player": {
@@ -50,6 +53,11 @@
 			"params": {
 				"map": "player/heart.png",
 				"transparent": true
+			}
+		},
+		"mat_counter_charge": {
+			"type": "MeshBasicMaterial",
+			"params": {
 			}
 		}
 	}

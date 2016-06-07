@@ -43,7 +43,7 @@ Renderer.prototype.Init = function(canvas) {
         unitsWidth / 2,
         unitsHeight / 2,
         unitsHeight / -2,
-        1,
+        250,
         1000);
 
     this.m_3Camera.position.z = 500;
@@ -124,7 +124,7 @@ Renderer.prototype.LoadTexture = function(_path) {
         that.m_3Textures[_path] = texture;
 
     }, this.onProgress, this.onError);
-    
+
     this.m_3Textures[_path] = true;
 };
 
@@ -199,29 +199,35 @@ Renderer.prototype.Render = function() {
 };
 
 //==============================================================================
-Renderer.prototype.CreateRenderObject = function(_geoName, _texName) {
+Renderer.prototype.CreateRenderObject = function(_elements) {
 
-    var sourceMat = this.m_3Materials[_texName];
-    var sourceGeo = this.m_3Geos[_geoName];
-        
-    if (!sourceMat) {
-        sourceMat = new THREE.MeshNormalMaterial();
-        if( _texName ) {
-            console.log( "Could not find a material called '" + _texName + "'." );
-        }
-    }
-    
     var newObject = new THREE.Object3D();
-    
-    if( sourceMat instanceof THREE.SpriteMaterial ) {
-        var newSprite = new THREE.Sprite( sourceMat.clone() );
-        newSprite.position.z = 16;
-        newObject.add( newSprite );
+
+    if (_elements) {
+        
+        var that = this;
+        _elements.forEach(function(_element) {
+            var matName = _element["material"];
+            var sourceMat = that.m_3Materials[matName];
+            var sourceGeo = that.m_3Geos[_element["geo"]];
+
+            if (!sourceMat) {
+                sourceMat = new THREE.MeshNormalMaterial();
+                if (matName) {
+                    console.log("Could not find a material called '" + matName + "'.");
+                }
+            }
+            if (sourceMat instanceof THREE.SpriteMaterial) {
+                var newSprite = new THREE.Sprite(sourceMat.clone());
+                newSprite.position.z = 16;
+                newObject.add(newSprite);
+            }
+            else if (sourceGeo) {
+                newObject.add(new THREE.Mesh(sourceGeo, sourceMat.clone()));
+            }
+        });
     }
-    else if( sourceGeo ) {
-        newObject.add(new THREE.Mesh(sourceGeo, sourceMat));
-    }
-    
+
     /*var material = new THREE.LineBasicMaterial({
         color: 0xffffff
     });
