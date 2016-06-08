@@ -101,6 +101,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     newObj.m_nHealth = 3;
     var counterRecharge = 0;
     var counterTimer = 0;
+    var shakeTimer = 10;
 
     var fireTimer = 1;
     var entranceTimer = 0;
@@ -108,19 +109,14 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     newObj.AddUpdateCallback(function(_fDT) {
 
-        var fullChargeBuff = 0;
-        if( counterRecharge > 5 ) {
-            fullChargeBuff += 0.1;    
-        }
-        
         var botRatio = THREE.Math.smootherstep(counterRecharge, 0, 5 / 3);
-        newObj.m_3DObject.children[1].material.color = new THREE.Color(0.1 * botRatio + fullChargeBuff, 0.2 * botRatio + fullChargeBuff, 0.3 * botRatio + fullChargeBuff);
+        newObj.m_3DObject.children[1].material.color = new THREE.Color(0.1 * botRatio, 0.2 * botRatio, 0.3 * botRatio);
 
         var midRatio = THREE.Math.smootherstep(counterRecharge, 5 / 3, 5 / 3 * 2);
-        newObj.m_3DObject.children[2].material.color = new THREE.Color(0.2 * midRatio + fullChargeBuff, 0.4 * midRatio + fullChargeBuff, 0.6 * midRatio + fullChargeBuff);
+        newObj.m_3DObject.children[2].material.color = new THREE.Color(0.2 * midRatio, 0.4 * midRatio, 0.6 * midRatio);
 
         var topRatio = THREE.Math.smootherstep(counterRecharge, 5 / 3 * 2, 5);
-        newObj.m_3DObject.children[3].material.color = new THREE.Color(0.3 * topRatio + fullChargeBuff, 0.6 * topRatio + fullChargeBuff, 0.9 * topRatio + fullChargeBuff);
+        newObj.m_3DObject.children[3].material.color = new THREE.Color(0.3 * topRatio, 0.6 * topRatio, 0.9 * topRatio);
 
         if (entranceTimer < 1.5) {
 
@@ -176,7 +172,6 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             if (counterRecharge > 5 && touchLastFrame == true) {
                 counterRecharge = 0;
                 counterTimer = 0;
-                console.log("Counter!");
             }
 
             touchLastFrame = false;
@@ -201,6 +196,16 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
         counterRecharge += _fDT;
         counterTimer += _fDT;
+
+        shakeTimer += _fDT;
+
+        if (shakeTimer < 0.25) {
+            var vecLoc = new THREE.Vector3(0.1, 0, 0);
+            var angle = THREE.Math.randFloat(0, 3.14 * 2);
+            vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+            newObj.m_3DObject.position.x += vecLoc.x;
+            newObj.m_3DObject.position.y += vecLoc.y;
+        }
     });
 
     newObj.AddCollisionCallback(function(_otherObj) {
@@ -228,6 +233,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     newObj.Damage = function(_amount) {
         if (counterTimer > 0.5) {
             oldDamage(_amount);
+            shakeTimer = 0;
         }
     };
 
@@ -389,6 +395,13 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
     return newObj;
 });
 
+var sphereRows = [];
+sphereRows[0] = [];
+sphereRows[1] = [];
+sphereRows[2] = [];
+sphereRows[3] = [];
+sphereRows[4] = [];
+
 window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
@@ -396,6 +409,29 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
     newObj.m_nHealth = 3;
     var fireTimer = 0;
     var mode = "left";
+    var rowIndex = -1;
+
+    for (var i = 0; i < sphereRows.length; ++i) {
+        var currRow = sphereRows[i];
+
+        for (var n = 0; n < sphereRows.length; ++n) {
+            var checkRow = sphereRows[n];
+
+            if (currRow.length < checkRow.length) {
+                rowIndex = i;
+                break;
+            }
+        }
+
+        if (rowIndex > -1)
+            break;
+    }
+
+    if (rowIndex < 0)
+        rowIndex = sphereRows.length - 1;
+
+    sphereRows[rowIndex].push(newObj);
+
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.m_3DObject.rotation.y += _fDT;
 
@@ -408,6 +444,72 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
             newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y - 0.5 + sourceVel.y);
             fireTimer = 0;
         }
+
+        var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0.1);
+        var topRight = window.engine.Renderer.ScreenToGamePoint(1, 0.9);
+        if (bottomLeft && topRight) {
+
+            var objPos = newObj.GetPosition();
+            var targetY = 6 * (rowIndex + 1);
+
+            if (objPos.y - 0.5 > targetY) {
+                newObj.AddVelocity(0, -1 * _fDT);
+            }
+            else if (objPos.y + 0.5 < targetY) {
+                newObj.AddVelocity(0, 1 * _fDT);
+            }
+            else {
+                if (objPos.x - 0.5 < bottomLeft.x + 3) {
+                    mode = "right";
+                }
+                if (objPos.x + 0.5 > topRight.x - 3) {
+                    mode = "left";
+                }
+
+                if (mode == "left") {
+                    newObj.AddVelocity(-0.5 * _fDT, 0);
+                }
+                else {
+                    newObj.AddVelocity(0.5 * _fDT, 0);
+                }
+            }
+
+            var vel = newObj.GetVelocity();
+            vel.clampLength(-0.25, 0.25);
+            newObj.SetVelocity(vel.x, vel.y);
+        }
+    });
+
+    newObj.AddDestroyCallback(function() {
+        sphereRows[rowIndex].splice(sphereRows[rowIndex].indexOf(newObj), 1);
+    });
+
+    AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
+
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("mega-sphere", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("mega-sphere"));
+
+    var sphereCount = 3;
+
+    for (var i = 0; i < sphereCount; ++i) {
+
+        var vecLoc = new THREE.Vector3(0, 1, 0);
+
+        var angle = 3.14 * 2 / 3 * i;
+        vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+
+        newObj.m_3DObject.children[i].position.set(vecLoc.x, vecLoc.y, 0);
+    }
+
+
+    newObj.m_nHealth = 6;
+    var mode = "left";
+    newObj.AddUpdateCallback(function(_fDT) {
+        newObj.m_3DObject.rotation.z += _fDT;
 
         var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0.1);
         var topRight = window.engine.Renderer.ScreenToGamePoint(1, 0.9);
@@ -437,13 +539,28 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
                 }
 
                 var vel = newObj.GetVelocity();
-                vel.clampLength(-0.5, 0.5);
+                vel.clampLength(-0.25, 0.25);
                 newObj.SetVelocity(vel.x, vel.y);
             }
         }
     });
 
-    AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
+    newObj.AddDestroyCallback(function() {
+
+        var sphereCount = 3;
+
+        for (var i = 0; i < sphereCount; ++i) {
+
+            var worldPos = newObj.m_3DObject.children[i].position.clone();
+            newObj.m_3DObject.children[i].localToWorld(worldPos);
+
+            g_GameManager.SpawnObject("sphere").SetPosition(worldPos.x, worldPos.y);
+        }
+
+    });
+
+    AddDestroyParticle(newObj, "sprite-test", 16, 0.66, 1, 2);
 
     return newObj;
+
 });

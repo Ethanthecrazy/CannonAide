@@ -63,6 +63,16 @@
 				{ "layer": "enemy", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -0.5 }
 			]
 		},
+		"mega-sphere": {
+			"elements": [
+				{ "geo": "mesh_sphere", "material": "mat_sphere" },
+				{ "geo": "mesh_sphere", "material": "mat_sphere" },
+				{ "geo": "mesh_sphere", "material": "mat_sphere" }
+			],
+			"colliders":[ 
+				{ "layer": "enemy", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+			]
+		},
 		"e-bullet": {
 			"elements": [
 				{ "geo": "mesh_pbullet", "material": "mat_pbullet" }
