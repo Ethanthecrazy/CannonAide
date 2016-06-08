@@ -45,7 +45,7 @@
 			"params": {
 				"map": "particle/spark.png",
 				"transparent": true,
-				"color": "rgb(100, 160, 200)"
+				"color": "rgb(200, 160, 100)"
 			}
 		},
 		"mat_heart": {

@@ -8,7 +8,7 @@
 				{ "geo": "mesh_counter_top", "material": "mat_counter_charge" }
 			],
 			"colliders":[ 
-				{ "layer": "player", "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
+				{ "layer": "player", "physics": true, "left": -1.5, "right": 1.5, "top": 2, "bottom": -1.5 }
 			]
 		},
 		"p-bullet": {
@@ -16,7 +16,7 @@
 				{ "geo": "mesh_pbullet", "material": "mat_pbullet" }
 			],
 			"colliders":[ 
-				{ "layer": "p-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
+				{ "layer": "p-bullet", "physics": true, "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
 		},
 		"p-counter-bullet": {
@@ -24,7 +24,7 @@
 				{ "geo": "mesh_cube", "material": "mat_cube" }
 			],
 			"colliders": [
-				{ "layer": "pc-bullet", "left": -1, "right": 1, "top": 64, "bottom": -64 }
+				{ "layer": "pc-bullet", "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
 		},
 		"debris": {
@@ -37,22 +37,22 @@
 		},
 		"left-barrier": {
 			"colliders":[ 
-				{ "layer": "barrier", "left": -1, "right": 1, "top": 32, "bottom": -32 }
+				{ "layer": "barrier", "physics": true, "left": -1, "right": 1, "top": 32, "bottom": -32 }
 			]
 		},
 		"right-barrier": {
 			"colliders":[ 
-				{ "layer": "barrier", "left": -1, "right": 1, "top": 32, "bottom": -32 }
+				{ "layer": "barrier", "physics": true, "left": -1, "right": 1, "top": 32, "bottom": -32 }
 			]
 		},
 		"bottom-barrier": {
 			"colliders":[ 
-				{ "layer": "barrier", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+				{ "layer": "barrier", "physics": true, "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
 		},
 		"top-barrier": {
 			"colliders":[ 
-				{ "layer": "barrier", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+				{ "layer": "barrier", "physics": true, "left": -1, "right": 1, "top": 7, "bottom": -1 }
 			]
 		},
 		"sphere": {

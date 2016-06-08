@@ -185,7 +185,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
                 var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
                 var sourcePos = newObj.GetPosition();
                 var sourceVel = newObj.GetVelocity();
-                newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
+                newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 2 + sourceVel.y);
                 fireTimer = 0;
             }
         }
@@ -208,17 +208,6 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
         }
     });
 
-    newObj.AddCollisionCallback(function(_otherObj) {
-
-        if (_otherObj.layer == "e-bullet" && counterTimer < 0.5) {
-            var newBullet = window.engine.GameManager.SpawnObject("p-counter-bullet");
-            var sourcePos = _otherObj.parent.GetPosition();
-            var sourceVel = newObj.GetVelocity();
-            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
-            newBullet.damageAmount = 3;
-        }
-    });
-
     AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
 
     newObj.AddDestroyCallback(function() {
@@ -231,7 +220,14 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
     var oldDamage = newObj.Damage.bind(newObj);
     newObj.Damage = function(_amount) {
-        if (counterTimer > 0.5) {
+        if (counterTimer <= 0.5) {
+            var newBullet = window.engine.GameManager.SpawnObject("p-counter-bullet");
+            var sourcePos = newObj.GetPosition();
+            var sourceVel = newObj.GetVelocity();
+            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
+            newBullet.damageAmount = _amount * 3;
+        }
+        else {
             oldDamage(_amount);
             shakeTimer = 0;
         }
@@ -258,7 +254,7 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
         g_GameManager.Destroy(newObj);
     });
 
-    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.2);
+    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.5);
 
     return newObj;
 });
@@ -268,10 +264,10 @@ window.engine.GameManager.AddObjectFunction("p-counter-bullet", function(_gameOb
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-counter-bullet"));
 
     newObj.AddUpdateCallback(function(_fDT) {
-        newObj.SetVelocity(0, 0);
+        newObj.SetVelocity(0, 3);
     });
 
-    AddTimeout(newObj, 0.5);
+    AddTimeout(newObj, 3);
 
     newObj.AddCollisionCallback(function(_otherObj) {
         if (newObj.damageAmount)

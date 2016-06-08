@@ -56,15 +56,33 @@ InputManager.prototype.handleTouch = function(e) {
 };
 
 //==============================================================================
+InputManager.prototype.GenerateMouseTouch = function(e) {
+    
+    var touchX = e.clientX / window.innerWidth;
+    var touchY = e.clientY / window.innerHeight;
+    
+    if( touchX > 1 )
+        touchX = 1;
+    if( touchX < 0 )
+        touchX = 0;
+    if( touchY > 1 )
+        touchY = 1;
+    if( touchY < 0 )
+        touchY = 0;
+        
+    return {
+        x: touchX,
+        y: touchY,
+        id: 0
+    };
+};
+
+//==============================================================================
 InputManager.prototype.onMouseDown = function(e) {
     e = e || window.event;
     e.preventDefault();
 
-    this.m_currTouches[0] = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-        id: 0
-    };
+    this.m_currTouches[0] = this.GenerateMouseTouch(e);
 };
 
 //==============================================================================
@@ -73,8 +91,7 @@ InputManager.prototype.onMouseMove = function(e) {
     e.preventDefault();
 
     if (this.m_currTouches[0]) {
-        this.m_currTouches[0].x = e.clientX / window.innerWidth;
-        this.m_currTouches[0].y = e.clientY / window.innerHeight;
+        this.m_currTouches[0] = this.GenerateMouseTouch(e);
     }
 };
 

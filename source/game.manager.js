@@ -25,8 +25,8 @@ GameObject.prototype.SetPosition = function(_x, _y) {
     vOffset.subVectors(this.m_3vPrevPos, this.m_3vCurrPos);
 
     this.m_3vCurrPos.set(_x, _y);
-    this.m_3vPrevPos.addVectors(this.m_3vCurrPos, vOffset);
-
+    this.m_3vPrevPos.set(_x, _y);
+    
     if (this.m_3DObject) {
         this.m_3DObject.position.x = this.m_3vCurrPos.x;
         this.m_3DObject.position.y = this.m_3vCurrPos.y;
@@ -37,11 +37,6 @@ GameObject.prototype.SetPosition = function(_x, _y) {
 GameObject.prototype.ShiftPostion = function(_x, _y) {
     this.m_3vCurrPos.x += _x;
     this.m_3vCurrPos.y += _y;
-
-    if (this.m_3DObject) {
-        this.m_3DObject.position.x = this.m_3vCurrPos.x;
-        this.m_3DObject.position.y = this.m_3vCurrPos.y;
-    }
 };
 
 //==============================================================================
@@ -70,6 +65,18 @@ GameObject.prototype.AddVelocity = function(_x, _y, _cap) {
 //==============================================================================
 GameObject.prototype.GetVelocity = function() {
     return new THREE.Vector2(this.m_3vCurrPos.x - this.m_3vPrevPos.x, this.m_3vCurrPos.y - this.m_3vPrevPos.y);
+};
+
+//==============================================================================
+GameObject.prototype.InterpolatePosition = function( _timeAhead ) {
+    
+    var vel = this.GetVelocity();
+    vel.multiplyScalar( _timeAhead );
+    
+    if (this.m_3DObject) {
+        this.m_3DObject.position.x = this.m_3vCurrPos.x + vel.x;
+        this.m_3DObject.position.y = this.m_3vCurrPos.y + vel.y;
+    }
 };
 
 //==============================================================================
@@ -112,10 +119,10 @@ GameObject.prototype.AddCollider = function(_collider) {
 
 //==============================================================================
 GameObject.prototype.GetColliderCount = function() {
-    
-    if( this.m_3Colliders )
+
+    if (this.m_3Colliders)
         return this.m_3Colliders.length;
-    
+
     return 0;
 };
 
@@ -131,6 +138,7 @@ GameObject.prototype.GetCollider = function(_nIndex) {
     var newBox = new THREE.Box2(v2Min, v2Max);
     // decoreate the box
     newBox.layer = collSource["layer"];
+    newBox.physics = collSource["physics"];
     newBox.parent = this;
 
     return newBox;
@@ -260,7 +268,10 @@ GameManager.prototype.SpawnObject = function(_name) {
             this.m_ColliderLayers[currColl.layer] = layerArray;
         }
 
-        layerArray.push( { object: gameObject, index: i } );
+        layerArray.push({
+            object: gameObject,
+            index: i
+        });
     }
 
     this.m_GameObjects.push(gameObject);
@@ -314,14 +325,14 @@ GameManager.prototype.Update = function() {
             var firstLayer = this.m_ColliderLayers[currCollision[0]];
             var secondLayer = this.m_ColliderLayers[currCollision[1]];
 
-            if( !firstLayer || !secondLayer )
+            if (!firstLayer || !secondLayer)
                 continue;
-                
+
             for (var i = 0; i < firstLayer.length; ++i) {
-                var firstCollider = firstLayer[i].object.GetCollider( firstLayer[i].index );
+                var firstCollider = firstLayer[i].object.GetCollider(firstLayer[i].index);
 
                 for (var n = 0; n < secondLayer.length; ++n) {
-                    var secondCollider = secondLayer[n].object.GetCollider( secondLayer[n].index );
+                    var secondCollider = secondLayer[n].object.GetCollider(secondLayer[n].index);
 
                     if (this.DoCollision(firstCollider.parent, firstCollider, secondCollider.parent, secondCollider)) {
                         firstCollider.parent.onCollision(secondCollider);
@@ -332,7 +343,9 @@ GameManager.prototype.Update = function() {
         }
     }
 
+    var that = this;
     this.m_GameObjects.forEach(function(currentValue, index, array) {
+        currentValue.InterpolatePosition( that.m_nFixedTimer / FIXED_TIMESTEP );
         currentValue.Update(dt);
     });
 };
@@ -356,15 +369,18 @@ GameManager.prototype.DoCollision = function(_object1, _collider1, _object2, _co
         var ySign = Math.sign(vToColl2.y);
         vToColl2.y = Math.abs(_collider1.size().y / 2 + _collider2.size().y / 2 - Math.abs(vToColl2.y));
 
-        if (Math.abs(vToColl2.x) < Math.abs(vToColl2.y)) {
+        if (_collider1.physics && _collider2.physics) {
 
-            _object1.ShiftPostion(vToColl2.x / -2 * xSign, 0);
-            _object2.ShiftPostion(vToColl2.x / 2 * xSign, 0);
-        }
-        else {
+            if (Math.abs(vToColl2.x) < Math.abs(vToColl2.y)) {
 
-            _object1.ShiftPostion(0, vToColl2.y / -2 * ySign);
-            _object2.ShiftPostion(0, vToColl2.y / 2 * ySign);
+                _object1.ShiftPostion(vToColl2.x / -2 * xSign, 0);
+                _object2.ShiftPostion(vToColl2.x / 2 * xSign, 0);
+            }
+            else {
+
+                _object1.ShiftPostion(0, vToColl2.y / -2 * ySign);
+                _object2.ShiftPostion(0, vToColl2.y / 2 * ySign);
+            }
         }
 
         return true;
@@ -398,11 +414,11 @@ GameManager.prototype.RemoveGameObject = function(_object) {
         var currColl = _object.GetCollider(i);
 
         var currLayer = this.m_ColliderLayers[currColl.layer];
-        var index = currLayer.findIndex( function(element, index, array){
-            return Object.is( element.object, _object ) && element.index == i;
+        var index = currLayer.findIndex(function(element, index, array) {
+            return Object.is(element.object, _object) && element.index == i;
         });
-        
-        currLayer.splice( index, 1);
+
+        currLayer.splice(index, 1);
     }
 
     var objIndex = this.m_GameObjects.indexOf(_object);
