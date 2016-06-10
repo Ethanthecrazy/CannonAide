@@ -1,5 +1,6 @@
 /* global THREE */
 /* global $ */
+var loadTime = (new Date()).getTime();
 
 function Renderer() {
 
@@ -119,7 +120,7 @@ Renderer.prototype.LoadTexture = function(_path) {
     }
 
     var that = this;
-    this.m_3Textureloader.load("resources/" + _path, function(texture) {
+    this.m_3Textureloader.load("resources/" + _path + "?t=" + loadTime , function(texture) {
 
         that.m_3Textures[_path] = texture;
 
@@ -152,7 +153,7 @@ Renderer.prototype.LoadGeometry = function(_name, _path) {
     }
 
     var that = this;
-    this.m_3OBJLoader.load("resources/" + _path, function(object) {
+    this.m_3OBJLoader.load("resources/" + _path + "?t=" + loadTime, function(object) {
 
         object.traverse(function(child) {
             if (child instanceof THREE.Mesh) {

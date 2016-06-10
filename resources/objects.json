@@ -24,7 +24,7 @@
 				{ "geo": "mesh_cube", "material": "mat_cube" }
 			],
 			"colliders": [
-				{ "layer": "pc-bullet", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+				{ "layer": "pc-bullet", "left": -1, "right": 1, "top": 1.5, "bottom": -1.5 }
 			]
 		},
 		"debris": {
@@ -60,7 +60,7 @@
 				{ "geo": "mesh_sphere", "material": "mat_sphere" }
 			],
 			"colliders":[ 
-				{ "layer": "enemy", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -0.5 }
+				{ "layer": "enemy", "left": -1, "right": 1, "top": 1, "bottom": -1 }
 			]
 		},
 		"mega-sphere": {
@@ -70,7 +70,7 @@
 				{ "geo": "mesh_sphere", "material": "mat_sphere" }
 			],
 			"colliders":[ 
-				{ "layer": "enemy", "left": -1, "right": 1, "top": 1, "bottom": -1 }
+				{ "layer": "enemy", "left": -2, "right": 2, "top": 2, "bottom": -2 }
 			]
 		},
 		"e-bullet": {
