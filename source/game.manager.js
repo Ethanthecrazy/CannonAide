@@ -16,6 +16,7 @@ function GameObject(_3DObject, _colliderList) {
     this.m_onDestroyCallbacks = [];
 
     this.isDestroyed = false;
+    this.m_timeSinceDamage = 60;
 }
 
 //==============================================================================
@@ -92,6 +93,10 @@ GameObject.prototype.AddUpdateCallback = function(_callback) {
 //==============================================================================
 GameObject.prototype.Update = function(_fDelta) {
 
+    if (this.m_nHealth) {
+        this.m_timeSinceDamage += _fDelta;
+    }
+    
     for (var updateItr in this.m_onUpdateCallbacks) {
         var currCall = this.m_onUpdateCallbacks[updateItr];
         currCall(_fDelta);
@@ -166,6 +171,8 @@ GameObject.prototype.Damage = function(_amount) {
         if (this.m_nHealth < 1) {
             window.engine.GameManager.Destroy(this);
         }
+        
+        this.m_timeSinceDamage = 0;
     }
 };
 

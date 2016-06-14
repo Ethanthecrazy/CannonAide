@@ -5,7 +5,6 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     newObj.m_nHealth = 3;
     var counterRecharge = 0;
     var counterTimer = 0;
-    var shakeTimer = 10;
 
     var fireTimer = 1;
     var entranceTimer = 0;
@@ -70,6 +69,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             toPoint.clampLength(-1.5, 1.5);
             newObj.AddVelocity(toPoint.x, toPoint.y);
             touchLastFrame = true;
+            counterRecharge += _fDT;
         }
         else {
 
@@ -97,18 +97,21 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
         newObj.m_3DObject.rotation.y = newObj.GetVelocity().x * 0.5;
         newObj.m_3DObject.rotation.x = newObj.GetVelocity().y * -0.5;
 
-
-        counterRecharge += _fDT;
         counterTimer += _fDT;
 
-        shakeTimer += _fDT;
-
-        if (shakeTimer < 0.25) {
+        if (newObj.m_timeSinceDamage < 0.25) {
             var vecLoc = new THREE.Vector3(0.3, 0, 0);
             var angle = THREE.Math.randFloat(0, 3.14 * 2);
             vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
             newObj.m_3DObject.position.x += vecLoc.x;
             newObj.m_3DObject.position.y += vecLoc.y;
+        }
+        
+        if (newObj.m_timeSinceDamage < 0.1) {
+            this.m_3DObject.children[0].material.color = new THREE.Color(2, 2, 2);
+        }
+        else {
+            this.m_3DObject.children[0].material.color = new THREE.Color(1, 1, 1);
         }
     });
 
@@ -131,9 +134,8 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
             newBullet.damageAmount = _amount * 3;
         }
-        else {
+        else if( newObj.m_timeSinceDamage > 0.25 ){
             oldDamage(_amount);
-            shakeTimer = 0;
         }
     };
 

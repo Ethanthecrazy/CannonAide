@@ -75,7 +75,7 @@
 		},
 		"e-bullet": {
 			"elements": [
-				{ "geo": "mesh_pbullet", "material": "mat_pbullet" }
+				{ "geo": "mesh_ebullet", "material": "mat_ebullet" }
 			],
 			"colliders":[ 
 				{ "layer": "e-bullet", "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
