@@ -2,9 +2,13 @@ body {
     margin: 0px;
 }
 
-#container
-{
+#container {
     position: relative;
+}
+
+#viewport {
+    display: block;
+    
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
@@ -12,7 +16,27 @@ body {
     -ms-interpolation-mode: nearest-neighbor;
 }
 
-#viewport
-{
-    display: block;
+#progContainer {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 0px;
+}
+
+#progBarOuter {
+    position: relative;
+    width: 100%;
+    height: 2em;
+    background-color: gray;
+}
+#progBarInner {
+    position: absolute;
+    width: 1%;
+    height: 100%;
+    background-color: white;
+}
+
+@font-face {
+    font-family: 'Radioland';
+    src: url('resources/RADIOLAND.ttf') format('truetype')
 }

@@ -20,8 +20,12 @@
 
 <body>
   <div id="container">
-    <canvas id="viewport">
-    </canvas>
+    <canvas id="viewport"></canvas>
+  </div>
+  <div id="progContainer">
+    <div id="progBarOuter">
+      <div id="progBarInner"></div>
+    </div>
   </div>
   <script>
     /* global Stats */
@@ -40,6 +44,7 @@
       window.engine.GameManager.Load("resources/objects.json?t=" + time, "resources/collisions.json?t=" + time);
       window.engine.GameManager.onload = function() {
 
+        document.getElementById("progContainer").style.display = "none";
         window.engine.GameManager.Start();
         window.engine.GameManager.SpawnObject("AideGame");
 
@@ -65,7 +70,6 @@
 
       var text2 = document.createElement('div');
       text2.style.position = 'absolute';
-      //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
       text2.style.width = 100;
       text2.style.height = 100;
       text2.style.color = "white";

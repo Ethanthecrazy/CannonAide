@@ -10,8 +10,15 @@ function Renderer() {
 
     // Startup the loading manager
     this.m_3LoadManager = new THREE.LoadingManager();
+    
+    var progressBar = null;
     this.m_3LoadManager.onProgress = function(item, loaded, total) {
         console.log(item, loaded, total);
+        
+        if( !progressBar )
+            progressBar = document.getElementById("progBarInner");
+            
+        progressBar.style.width = ( loaded / total * 100  ) + "%";
     };
 
     this.m_3Scene.add(new THREE.AmbientLight(0x101030));
