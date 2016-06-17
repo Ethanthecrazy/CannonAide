@@ -67,5 +67,8 @@
 				"map": "sphere/sphere-bullet.png"
 			}
 		}
+	},
+	"audio": {
+		"load_test": "audio/Laser_Shoot.wav"
 	}
 }

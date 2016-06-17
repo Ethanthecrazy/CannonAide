@@ -10,15 +10,15 @@ function Renderer() {
 
     // Startup the loading manager
     this.m_3LoadManager = new THREE.LoadingManager();
-    
+
     var progressBar = null;
     this.m_3LoadManager.onProgress = function(item, loaded, total) {
         console.log(item, loaded, total);
-        
-        if( !progressBar )
+
+        if (!progressBar)
             progressBar = document.getElementById("progBarInner");
-            
-        progressBar.style.width = ( loaded / total * 100  ) + "%";
+
+        progressBar.style.width = (loaded / total * 100) + "%";
     };
 
     this.m_3Scene.add(new THREE.AmbientLight(0x101030));
@@ -30,10 +30,12 @@ function Renderer() {
     // Start up the geometry loader
     this.m_3OBJLoader = new THREE.OBJLoader(this.m_3LoadManager);
     this.m_3Textureloader = new THREE.TextureLoader(this.m_3LoadManager);
+    this.m_3AudioLoader = new THREE.AudioLoader(this.m_3LoadManager);
 
     this.m_3Geos = {};
     this.m_3Textures = {};
     this.m_3Materials = {};
+    this.m_3Audio = {};
     this.m_3RenderObjects = {};
 }
 
@@ -55,6 +57,9 @@ Renderer.prototype.Init = function(canvas) {
         1000);
 
     this.m_3Camera.position.z = 500;
+
+    this.m_3Listener = new THREE.AudioListener();
+    this.m_3Camera.add(this.m_3Listener);
 
     this.m_3Renderer = new THREE.WebGLRenderer({
         canvas: canvas
@@ -109,6 +114,12 @@ Renderer.prototype.Load = function(_path) {
             }
         }
 
+        var loadAudio = _Index["audio"];
+        for (var audioName in loadAudio) {
+            var currAudio = loadAudio[audioName];
+            that.LoadAudio(audioName, currAudio);
+        }
+
         that.m_3LoadManager.onLoad = function() {
             this.CreateMaterials(_Index["materials"]);
             this.onLoad();
@@ -127,7 +138,7 @@ Renderer.prototype.LoadTexture = function(_path) {
     }
 
     var that = this;
-    this.m_3Textureloader.load("resources/" + _path + "?t=" + loadTime , function(texture) {
+    this.m_3Textureloader.load("resources/" + _path + "?t=" + loadTime, function(texture) {
 
         that.m_3Textures[_path] = texture;
 
@@ -155,7 +166,7 @@ Renderer.prototype.CreateMaterials = function(_matDefs) {
 //==============================================================================
 Renderer.prototype.LoadGeometry = function(_name, _path) {
 
-    if (this.m_3Geos[_path] != null) {
+    if (this.m_3Geos[_name] != null) {
         return;
     }
 
@@ -170,7 +181,22 @@ Renderer.prototype.LoadGeometry = function(_name, _path) {
 
     }, this.onProgress, this.onError);
 
-    this.m_3Geos[_path] = "loading";
+    this.m_3Geos[_name] = "loading";
+};
+
+Renderer.prototype.LoadAudio = function(_name, _path) {
+
+    if (this.m_3Audio[_name] != null) {
+        return;
+    }
+
+    var that = this;
+    this.m_3AudioLoader.load("resources/" + _path + "?t=" + loadTime, function(audioBuffer) {
+        that.m_3Audio[_name] = audioBuffer;
+
+    }, this.onProgress, this.onError);
+
+    this.m_3Audio[_name] = "loading";
 };
 
 //==============================================================================
@@ -212,7 +238,7 @@ Renderer.prototype.CreateRenderObject = function(_elements) {
     var newObject = new THREE.Object3D();
 
     if (_elements) {
-        
+
         var that = this;
         _elements.forEach(function(_element) {
             var matName = _element["material"];
@@ -288,6 +314,24 @@ Renderer.prototype.ScreenToGamePoint = function(_fScreenPosX, _fScreenPosY) {
         return new THREE.Vector2(threeIntersect.x, threeIntersect.y);
     else
         return null;
+};
+
+Renderer.prototype.PlayAudio = function(_name) {
+    
+    if( !this.m_3Audio[_name] )
+        return null;
+        
+    // instantiate audio object
+    var newSound = new THREE.Audio(this.m_3Listener);
+    this.m_3Scene.add(newSound);
+
+    newSound.setBuffer(this.m_3Audio[_name]);
+    newSound.play();
+    
+    var that = this;
+    setTimeout( function() { 
+        that.m_3Scene.remove( newSound ); 
+    }, this.m_3Audio[_name].duration * 1000);
 };
 
 if (!window.engine)
