@@ -90,7 +90,6 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
                 var sourcePos = newObj.GetPosition();
                 var sourceVel = newObj.GetVelocity();
                 newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 2 + sourceVel.y);
-                window.engine.Renderer.PlayAudio( "load_test" );
                 fireTimer = 0;
             }
         }
@@ -121,7 +120,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     newObj.AddDestroyCallback(function() {
         setTimeout(function() {
             g_GameManager.DestroyAll();
-            g_GameManager.SpawnObject("AideGame");
+            g_GameManager.SpawnObject("logo");
         }, 3000);
 
     });

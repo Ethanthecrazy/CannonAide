@@ -82,12 +82,30 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
                 var angle = THREE.Math.randFloat(0, 3.14);
                 vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
                 g_GameManager.SpawnObject("sphere").SetPosition(vecLoc.x, vecLoc.y);
-
+                
                 fSpawnTimer = 0;
             }
         }
     });
 
+    return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, []);
+
+    _d3Object.scale.x = 89 / 2;
+    _d3Object.scale.y = 18 / 2;
+
+    newObj.AddUpdateCallback(function(_fDT) {
+
+        if (g_InputManager.GetTouchCount() > 0) {
+            g_GameManager.DestroyAll();
+            g_GameManager.SpawnObject("AideGame");
+        }
+    });
+    
     return newObj;
 });
 

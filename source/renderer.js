@@ -35,7 +35,6 @@ function Renderer() {
     this.m_3Geos = {};
     this.m_3Textures = {};
     this.m_3Materials = {};
-    this.m_3Audio = {};
     this.m_3RenderObjects = {};
 }
 
@@ -114,12 +113,6 @@ Renderer.prototype.Load = function(_path) {
             }
         }
 
-        var loadAudio = _Index["audio"];
-        for (var audioName in loadAudio) {
-            var currAudio = loadAudio[audioName];
-            that.LoadAudio(audioName, currAudio);
-        }
-
         that.m_3LoadManager.onLoad = function() {
             this.CreateMaterials(_Index["materials"]);
             this.onLoad();
@@ -141,6 +134,8 @@ Renderer.prototype.LoadTexture = function(_path) {
     this.m_3Textureloader.load("resources/" + _path + "?t=" + loadTime, function(texture) {
 
         that.m_3Textures[_path] = texture;
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.LinearMipMapLinearFilter;
 
     }, this.onProgress, this.onError);
 
@@ -314,24 +309,6 @@ Renderer.prototype.ScreenToGamePoint = function(_fScreenPosX, _fScreenPosY) {
         return new THREE.Vector2(threeIntersect.x, threeIntersect.y);
     else
         return null;
-};
-
-Renderer.prototype.PlayAudio = function(_name) {
-    
-    if( !this.m_3Audio[_name] )
-        return null;
-        
-    // instantiate audio object
-    var newSound = new THREE.Audio(this.m_3Listener);
-    this.m_3Scene.add(newSound);
-
-    newSound.setBuffer(this.m_3Audio[_name]);
-    newSound.play();
-    
-    var that = this;
-    setTimeout( function() { 
-        that.m_3Scene.remove( newSound ); 
-    }, this.m_3Audio[_name].duration * 1000);
 };
 
 if (!window.engine)

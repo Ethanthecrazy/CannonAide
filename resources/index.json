@@ -58,17 +58,20 @@
 		},
 		"mat_counter_charge": {
 			"type": "MeshBasicMaterial",
-			"params": {
-			}
+			"params": {}
 		},
 		"mat_ebullet": {
 			"type": "MeshPhongMaterial",
 			"params": {
 				"map": "sphere/sphere-bullet.png"
 			}
+		},
+		"mat_logo": {
+			"type": "SpriteMaterial",
+			"params": {
+				"map": "logo.png",
+				"transparent": true
+			}
 		}
-	},
-	"audio": {
-		"load_test": "audio/Laser_Shoot.wav"
 	}
 }

@@ -95,6 +95,11 @@
 			"elements": [
 				{ "material": "mat_heart" }
 			]
+		},
+		"logo": {
+			"elements": [
+				{ "material": "mat_logo" }
+			]
 		}
 	}
 }
