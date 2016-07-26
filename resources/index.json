@@ -72,6 +72,13 @@
 				"map": "logo.png",
 				"transparent": true
 			}
+		},
+		"mat_note": {
+			"type": "SpriteMaterial",
+			"params": {
+				"map": "note.png",
+				"transparent": true
+			}
 		}
 	}
 }

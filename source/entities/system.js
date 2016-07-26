@@ -95,6 +95,8 @@ window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Obj
 
     var newObj = _gameObject || new GameObject(_d3Object, []);
 
+    g_GameManager.SpawnObject("note");
+    
     _d3Object.scale.x = 89 / 2;
     _d3Object.scale.y = 18 / 2;
 
@@ -107,6 +109,27 @@ window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Obj
     });
     
     return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction("note", function(_gameObject, _d3Object) {
+
+    var newObj = _gameObject || new GameObject(_d3Object, []);
+
+    _d3Object.scale.x = 40;
+    _d3Object.scale.y = 5;
+    
+    newObj.SetPosition( 0, -10 );
+    
+    var noteTimer = 0;
+    newObj.AddUpdateCallback(function(_fDT) {
+        noteTimer += _fDT * 6;
+        
+        newObj.SetPosition( 0, -10 + Math.sin( noteTimer ) * 0.5 );
+    
+    });
+
+    return newObj;
+    
 });
 
 window.engine.GameManager.AddObjectFunction("right-barrier", function(_gameObject, _d3Object) {
