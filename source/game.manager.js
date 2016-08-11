@@ -3,13 +3,16 @@
 
 //==============================================================================
 function GameObject(_3DObject, _colliderList) {
-    this.m_3vPrevPos = new THREE.Vector2(0, 0);
-    this.m_3vCurrPos = new THREE.Vector2(0, 0);
+    this.m_3vPrevPos = new THREE.Vector3(0, 0, 0);
+    this.m_3vCurrPos = new THREE.Vector3(0, 0, 0);
 
     this.m_bCollisionPhysics = false;
 
     this.m_3DObject = _3DObject;
     this.m_3Colliders = _colliderList;
+    
+    this.m_gobParent = null;
+    this.m_gobChildren = [];
 
     this.m_onUpdateCallbacks = [];
     this.m_onCollisionCallbacks = [];
@@ -179,6 +182,24 @@ GameObject.prototype.Damage = function(_amount) {
 GameObject.prototype.AddDestroyCallback = function(_callback) {
 
     this.m_onDestroyCallbacks.push(_callback.bind(this));
+};
+
+GameObject.prototype.AddChild = function( _child ) {
+    
+    if( this.m_gobChildren.indexOf( _child ) < 0 ) {
+        this.m_gobChildren.push(_child);
+    }
+    
+    _child.m_gobParent = this;
+};
+
+GameObject.prototype.RemoveChild = function( _child ) {
+    
+    var objIndex = this.m_gobChildren.indexOf(_child);
+    if (objIndex > -1) {
+        this.m_gobChildren.splice(objIndex, 1);
+        _child.m_gobParent = null;
+    }
 };
 
 var FIXED_TIMESTEP = 0.0416;
@@ -431,6 +452,14 @@ GameManager.prototype.RemoveGameObject = function(_object) {
     var objIndex = this.m_GameObjects.indexOf(_object);
     if (objIndex > -1) {
         this.m_GameObjects.splice(objIndex, 1);
+    }
+    
+    if( _object.m_gobParent ) {
+        _object.m_gobParent.RemoveChild( _object );
+    }
+    
+    for( var n = 0; n < _object.m_gobChildren.length; ++n ) {
+        this.RemoveGameObject( _object.m_gobChildren[n] );
     }
 };
 
