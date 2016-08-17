@@ -76,14 +76,15 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
         if( newObj.m_3v2TargetPos ) {
             
             var toPoint = newObj.m_3v2TargetPos.clone().sub(newObj.GetPosition());
-            toPoint.clampLength(-1.5, 1.5);
+            toPoint.clampLength(0, 1);
+            toPoint.multiplyScalar( _fDT );
             newObj.AddVelocity(toPoint.x, toPoint.y);
         }
 
         var vel = newObj.GetVelocity();
-        vel.clampLength(-0.25, 0.25);
+        vel.multiplyScalar( 0.95 );
         newObj.SetVelocity(vel.x, vel.y);
-
+        
         if (newObj.m_timeSinceDamage < 0.1) {
             this.m_3DObject.children[0].material.color = new THREE.Color(2, 2, 2);
         }

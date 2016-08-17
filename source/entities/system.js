@@ -85,7 +85,7 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
             vecLoc = new THREE.Vector3(topRight.y + 8, 0, 0);
         }
 
-        for( var i = 0; i < 6; ++i ) {
+        for( var i = 0; i < 12; ++i ) {
             
             var angle = THREE.Math.randFloat(0, 3.14);
             vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
@@ -227,7 +227,7 @@ window.engine.GameManager.AddObjectFunction("form-circle", function(_gameObject,
             var currChild = newObj.m_gobChildren[n];
             var currAngle = ( 3.14 * 2 / newObj.m_gobChildren.length * n ) + angle;
             
-            var targetPos = new THREE.Vector3(10, 0, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), currAngle);
+            var targetPos = new THREE.Vector3(newObj.m_gobChildren.length + Math.sin( angle ) * newObj.m_gobChildren.length / 2, 0, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), currAngle);
             targetPos.add( newObj.GetPosition() );
             currChild.m_3v2TargetPos = new THREE.Vector2( targetPos.x, targetPos.y );
         }
