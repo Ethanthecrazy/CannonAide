@@ -65,23 +65,30 @@
 
     var offsetCounter = 40;
 
+    var textContainer = document.createElement('div');
+    textContainer.style.position = 'absolute';
+    textContainer.style.width = 100;
+    textContainer.style.height = 100;
+    textContainer.style.color = "white";
+    textContainer.style.top = 40 + 'px';
+    textContainer.style.right = 20 + 'px';
+    textContainer.style.overflowY = 'scroll';
+    textContainer.style.height = ( 18 * 10 ) + 'px';
+    textContainer.style.opacity = 0.5;
+    document.body.appendChild(textContainer);
+    
     var oldLog = console.log;
     var customLog = function(message) {
 
       var text2 = document.createElement('div');
-      text2.style.position = 'absolute';
-      text2.style.width = 100;
-      text2.style.height = 100;
-      text2.style.color = "white";
       text2.innerHTML = message;
-      offsetCounter += 20;
-      text2.style.top = offsetCounter + 'px';
-      text2.style.left = 20 + 'px';
-      document.body.appendChild(text2);
-
+      textContainer.appendChild(text2);
+      textContainer.scrollTop = 65535;
       oldLog.apply(console, arguments);
     };
-    //console.log = customLog;
+    
+    console.log = customLog;
+    
   </script>
 
 </body>
