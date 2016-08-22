@@ -1,3 +1,5 @@
+/* global THREE */
+
 var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
@@ -62,40 +64,35 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
-    var circleForm = g_GameManager.SpawnObject("form-circle");
 
-    var fSpawnTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
-        fSpawnTimer += _fDT;
-        if (fSpawnTimer > 3) {
-            fSpawnTimer = 0;
+       
+       if( newObj.m_gobChildren.length < 1 ) {
+            
+            var circleForm = g_GameManager.SpawnObject("form-circle");
+            
+            var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0);
+            var topRight = window.engine.Renderer.ScreenToGamePoint(1, 1);
+            if (bottomLeft && topRight) {
+        
+                var vecLoc = new THREE.Vector3(topRight.length() + 8, 0, 0);
+        
+                for( var i = 0; i < 12; ++i ) {
+                    
+                    var angle = THREE.Math.randFloat(0, 3.14);
+                    vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+                    
+                    var newSphere = g_GameManager.SpawnObject("sphere");
+                    newSphere.SetPosition(vecLoc.x, vecLoc.y);
+                    circleForm.AddChild(newSphere);
+                }
+            }
+            
+            newObj.AddChild( circleForm );
         }
+        
     });
     
-    
-    var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0);
-    var topRight = window.engine.Renderer.ScreenToGamePoint(1, 1);
-    if (bottomLeft && topRight) {
-        // TODO: Make this use the length of the top left corner.
-        var vecLoc = null;
-        if (Math.abs(bottomLeft.x - topRight.x) > Math.abs(bottomLeft.y - topRight.y)) {
-            vecLoc = new THREE.Vector3(topRight.x + 8, 0, 0);
-        }
-        else {
-            vecLoc = new THREE.Vector3(topRight.y + 8, 0, 0);
-        }
-
-        for( var i = 0; i < 12; ++i ) {
-            
-            var angle = THREE.Math.randFloat(0, 3.14);
-            vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-            
-            var newSphere = g_GameManager.SpawnObject("sphere");
-            newSphere.SetPosition(vecLoc.x, vecLoc.y);
-            circleForm.AddChild(newSphere);
-        }
-    }
-
     return newObj;
 });
 
@@ -227,9 +224,13 @@ window.engine.GameManager.AddObjectFunction("form-circle", function(_gameObject,
             var currChild = newObj.m_gobChildren[n];
             var currAngle = ( 3.14 * 2 / newObj.m_gobChildren.length * n ) + angle;
             
-            var targetPos = new THREE.Vector3(newObj.m_gobChildren.length + Math.sin( angle ) * newObj.m_gobChildren.length / 2, 0, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), currAngle);
+            var targetPos = new THREE.Vector3(newObj.m_gobChildren.length + Math.sin( angle ) * newObj.m_gobChildren.length / 2 + 1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), currAngle);
             targetPos.add( newObj.GetPosition() );
             currChild.m_3v2TargetPos = new THREE.Vector2( targetPos.x, targetPos.y );
+        }
+        
+        if( newObj.m_gobChildren.length < 1 ) {
+            g_GameManager.Destroy( newObj );
         }
     });
 
