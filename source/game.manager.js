@@ -335,11 +335,12 @@ GameManager.prototype.Update = function() {
     var now = Date.now();
     var dt = (now - this.m_nLastUpdate) / 1000;
     this.m_nLastUpdate = now;
+    
+    if( dt > 0.1 ) {
+        dt = 0.1;
+    }
 
     this.m_nFixedTimer += dt;
-    if (this.m_nFixedTimer > FIXED_TIMESTEP * 10) {
-        this.m_nFixedTimer = FIXED_TIMESTEP * 10;
-    }
 
     while (this.m_nFixedTimer > FIXED_TIMESTEP) {
         this.m_nFixedTimer -= FIXED_TIMESTEP;
