@@ -106,10 +106,6 @@
 				{ "material": "mat_note" }
 			]
 		},
-		"string": {
-			"elements": [
-				{ "geo": "quad", "material": "mat_fixedsys" }
-			]
-		}
+		"string": { }
 	}
 }

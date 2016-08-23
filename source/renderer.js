@@ -315,6 +315,40 @@ Renderer.prototype.CreateRenderObject = function(_elements) {
 };
 
 //==============================================================================
+Renderer.prototype.CreateString = function( _text, _matName ) {
+
+    var newObject = new THREE.Object3D();
+    var sourceMat = this.m_3Materials[_matName];
+    var sourceGeo = this.m_3Geos["quad"];
+    
+    for( var i = 0; i < _text.length; ++i ) {
+        
+        var charCode = _text.charCodeAt( i ) - 32;
+        var charRow =  Math.floor( charCode / 18 );
+        var charColumn = Math.floor( charCode % 18 );
+        
+        var charGeo = sourceGeo.clone();
+        
+        var texSpaceConst = 14 / 256;
+        
+        var left = charColumn * texSpaceConst;
+        var right = left + texSpaceConst;
+        var top = 1 - ( charRow * texSpaceConst );
+        var bottom = 1 - ( charRow * texSpaceConst  + texSpaceConst );
+        
+        charGeo.faceVertexUvs[0][0] = [ new THREE.Vector2(left, bottom), new THREE.Vector2(right, top), new THREE.Vector2(left, top) ];
+        charGeo.faceVertexUvs[0][1] = [ new THREE.Vector2(left, bottom), new THREE.Vector2(right, bottom), new THREE.Vector2(right, top) ];
+    
+        var charMesh = new THREE.Mesh(charGeo, sourceMat.clone());
+        newObject.add( charMesh );
+        charMesh.position.x = i * 0.6 - _text.length / 2 * 0.6;
+    }
+    
+    this.m_3Scene.add(newObject);
+    return newObject;
+};
+
+//==============================================================================
 Renderer.prototype.Remove3DObject = function(_object) {
     this.m_3Scene.remove(_object);
 };

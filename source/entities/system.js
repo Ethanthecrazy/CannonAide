@@ -64,7 +64,7 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
-    g_GameManager.SpawnObject("string");
+    window.engine.Renderer.CreateString( "The quick brown fox jumps over the lazy dog.", "mat_fixedsys" );
     
     newObj.AddUpdateCallback(function(_fDT) {
        
