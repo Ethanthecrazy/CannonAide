@@ -64,7 +64,8 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
-
+    g_GameManager.SpawnObject("string");
+    
     newObj.AddUpdateCallback(function(_fDT) {
        
        if( newObj.m_gobChildren.length < 1 ) {
@@ -210,6 +211,17 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
     });
 
     return newObj;
+});
+
+window.engine.GameManager.AddObjectFunction( "string", function(_gameObject, _d3Object) {
+    
+    _d3Object.scale.x = 40;
+    _d3Object.scale.y = 40;
+
+    var newObj = _gameObject || new GameObject(_d3Object, null);
+    
+    return newObj;
+    
 });
 
 window.engine.GameManager.AddObjectFunction("form-circle", function(_gameObject, _d3Object) {

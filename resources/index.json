@@ -79,6 +79,13 @@
 				"map": "note.png",
 				"transparent": true
 			}
+		},
+		"mat_fixedsys": {
+			"type": "MeshBasicMaterial",
+			"params": {
+				"map": "fixedsys.png",
+				"transparent": true
+			}
 		}
 	}
 }

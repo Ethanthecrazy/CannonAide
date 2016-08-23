@@ -96,6 +96,9 @@ Renderer.prototype.GetGameDimensions = function() {
 
 //==============================================================================
 Renderer.prototype.Load = function(_path) {
+    
+    this.LoadDefaultQuad();
+        
     var that = this;
     $.getJSON(_path, function(_Index) {
 
@@ -179,6 +182,35 @@ Renderer.prototype.LoadGeometry = function(_name, _path) {
     this.m_3Geos[_name] = "loading";
 };
 
+//==============================================================================
+Renderer.prototype.LoadDefaultQuad = function() {
+    
+    if (this.m_3Geos["quad"] != null) {
+        return;
+    }
+    
+    var geometry = new THREE.Geometry();
+
+    geometry.vertices.push( new THREE.Vector3( -0.5, -0.5, 0 ) );
+    geometry.vertices.push( new THREE.Vector3( -0.5, 0.5, 0 ) );
+    geometry.vertices.push( new THREE.Vector3( 0.5, 0.5, 0 ) );
+    geometry.vertices.push( new THREE.Vector3( 0.5, -0.5, 0 ) );
+
+    geometry.faces.push( new THREE.Face3( 0, 2, 1 ) ); // counter-clockwise winding order
+    geometry.faces.push( new THREE.Face3( 0, 3, 2 ) );
+
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+    
+    geometry.faceVertexUvs[0][0] = [ new THREE.Vector2(0, 0), new THREE.Vector2(1, 1), new THREE.Vector2(0, 1) ];
+    geometry.faceVertexUvs[0][1] = [ new THREE.Vector2(0, 0), new THREE.Vector2(1, 0), new THREE.Vector2(1, 1) ];
+    
+    geometry.uvsNeedUpdate = true;
+    
+    this.m_3Geos["quad"] = geometry;
+};
+
+//==============================================================================
 Renderer.prototype.LoadAudio = function(_name, _path) {
 
     if (this.m_3Audio[_name] != null) {
