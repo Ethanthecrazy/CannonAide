@@ -101,11 +101,7 @@
 				{ "material": "mat_logo" }
 			]
 		},
-		"note": {
-			"elements": [
-				{ "material": "mat_note" }
-			]
-		},
-		"string": { }
+		"note": { },
+		"scoreboard": { }
 	}
 }

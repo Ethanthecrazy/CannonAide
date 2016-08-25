@@ -3,6 +3,7 @@
 var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
+var g_Scoreboard = null;
 
 function AddTimeout(_gameObject, _time) {
 
@@ -64,7 +65,7 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
-    window.engine.Renderer.CreateString( "The quick brown fox jumps over the lazy dog.", "mat_fixedsys" );
+    g_Scoreboard = g_GameManager.SpawnObject("scoreboard");
     
     newObj.AddUpdateCallback(function(_fDT) {
        
@@ -102,10 +103,10 @@ window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Obj
     var newObj = _gameObject || new GameObject(_d3Object, []);
 
     g_GameManager.SpawnObject("note");
-    
+
     _d3Object.scale.x = 89 / 2;
     _d3Object.scale.y = 18 / 2;
-
+    
     newObj.AddUpdateCallback(function(_fDT) {
 
         if (g_InputManager.GetTouchCount() > 0) {
@@ -119,23 +120,23 @@ window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Obj
 
 window.engine.GameManager.AddObjectFunction("note", function(_gameObject, _d3Object) {
 
+    var textObj = window.engine.Renderer.CreateString( "Tap or click to start!", "mat_fixedsys" ); 
+    _d3Object.add( textObj );
+        
     var newObj = _gameObject || new GameObject(_d3Object, []);
 
-    _d3Object.scale.x = 40;
-    _d3Object.scale.y = 5;
+    _d3Object.scale.x = 2;
+    _d3Object.scale.y = 2;
     
     newObj.SetPosition( 0, -10 );
     
     var noteTimer = 0;
     newObj.AddUpdateCallback(function(_fDT) {
-        noteTimer += _fDT * 6;
-        
+        noteTimer += _fDT * 4;
         newObj.SetPosition( 0, -10 + Math.sin( noteTimer ) * 0.5 );
-    
     });
-
-    return newObj;
     
+    return newObj;
 });
 
 window.engine.GameManager.AddObjectFunction("right-barrier", function(_gameObject, _d3Object) {
@@ -213,15 +214,35 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction( "string", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction( "scoreboard", function( _gameObject, _d3Object ){
     
-    _d3Object.scale.x = 40;
-    _d3Object.scale.y = 40;
-
-    var newObj = _gameObject || new GameObject(_d3Object, null);
+    var textObj = window.engine.Renderer.CreateString( "0", "mat_fixedsys" );
+    _d3Object.add( textObj );
+        
+    _d3Object.scale.x = 3;
+    _d3Object.scale.y = 3;
     
+    _d3Object.position.z = 16;
+    
+    var score = 0;
+    var newObj = _gameObject || new GameObject(_d3Object, []);
+    
+    newObj.SetPosition( 0, 30 );
+    
+    newObj.AddScore = function( _increase ) {
+        score += _increase;
+        
+        // Cleanup old text
+        _d3Object.remove( textObj );
+        window.engine.Renderer.Remove3DObject( textObj );
+        
+        // Create new object
+        textObj = window.engine.Renderer.CreateString( score.toString(), "mat_fixedsys" );
+        _d3Object.add( textObj );
+    };
+    
+    g_Scoreboard = newObj;
     return newObj;
-    
 });
 
 window.engine.GameManager.AddObjectFunction("form-circle", function(_gameObject, _d3Object) {

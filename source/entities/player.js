@@ -138,7 +138,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             oldDamage(_amount);
         }
     };
-
+    
     newObj.m_3DObject.children[1].position.z = 0.3;
     newObj.m_3DObject.children[2].position.z = 0.2;
     newObj.m_3DObject.children[3].position.z = 0.1;

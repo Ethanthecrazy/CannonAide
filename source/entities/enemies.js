@@ -21,47 +21,17 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
     return newObj;
 });
 
-var sphereRows = [];
-sphereRows[0] = [];
-sphereRows[1] = [];
-sphereRows[2] = [];
-sphereRows[3] = [];
-sphereRows[4] = [];
-
 window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3Object) {
 
     var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
 
     newObj.m_nHealth = 3;
     var fireTimer = 0;
-    var mode = "left";
-    var rowIndex = -1;
-
-    for (var i = 0; i < sphereRows.length; ++i) {
-        var currRow = sphereRows[i];
-
-        for (var n = 0; n < sphereRows.length; ++n) {
-            var checkRow = sphereRows[n];
-
-            if (currRow.length < checkRow.length) {
-                rowIndex = i;
-                break;
-            }
-        }
-
-        if (rowIndex > -1)
-            break;
-    }
-
-    if (rowIndex < 0)
-        rowIndex = sphereRows.length - 1;
-
-    sphereRows[rowIndex].push(newObj);
 
     newObj.AddUpdateCallback(function(_fDT) {
-        newObj.m_3DObject.rotation.x += _fDT;
+        //newObj.m_3DObject.rotation.x += _fDT;
         newObj.m_3DObject.rotation.y += _fDT * 1.0321;
-        newObj.m_3DObject.rotation.z += _fDT * 0.5945;
+        //newObj.m_3DObject.rotation.z += _fDT * 0.5945;
 
         fireTimer += _fDT;
         if (fireTimer > 3) {
@@ -94,10 +64,12 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
 
     });
 
-    newObj.AddDestroyCallback(function() {
-        sphereRows[rowIndex].splice(sphereRows[rowIndex].indexOf(newObj), 1);
+    newObj.AddDestroyCallback( function(){
+        if( g_Scoreboard ) {
+            g_Scoreboard.AddScore( 100 );
+        }
     });
-
+    
     AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
 
     return newObj;
