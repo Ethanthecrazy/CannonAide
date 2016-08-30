@@ -3,7 +3,7 @@
 
 <head>
   <title>CannonAide</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1" />
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type="text/javascript" src="source/lib/three.js"></script>
@@ -20,12 +20,13 @@
 
 <body>
   <div id="container">
-    <canvas id="viewport"></canvas>
-  </div>
-  <div id="progContainer">
-    <div id="progBarOuter">
-      <div id="progBarInner"></div>
-    </div>
+    <canvas id="viewport">
+      <div id="progContainer">
+        <div id="progBarOuter">
+          <div id="progBarInner"></div>
+        </div>
+      </div>
+    </canvas>
   </div>
   <script>
     /* global Stats */

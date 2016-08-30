@@ -1,11 +1,12 @@
-window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
 
     newObj.m_nHealth = 3;
     var counterRecharge = 0;
     var counterTimer = 0;
-
+    var counterAmount = 0;
+    
     var fireTimer = 1;
     var entranceTimer = 0;
     var touchLastFrame = false;
@@ -30,41 +31,13 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
             return;
         }
 
-        var anyMove = false;
-
-        if (g_InputManager.IsKeyDown(37)) {
-
-            newObj.AddVelocity(-20 * _fDT, 0, 1);
-            anyMove = true;
-        }
-
-        if (g_InputManager.IsKeyDown(38)) {
-
-            newObj.AddVelocity(0, 20 * _fDT, 1);
-            anyMove = true;
-
-        }
-
-        if (g_InputManager.IsKeyDown(39)) {
-
-            newObj.AddVelocity(20 * _fDT, 0, 1);
-            anyMove = true;
-        }
-
-        if (g_InputManager.IsKeyDown(40)) {
-
-            newObj.AddVelocity(0, -20 * _fDT, 1);
-            anyMove = true;
-        }
-
-        if (!anyMove)
-            newObj.SetVelocity(0, 0);
+        newObj.SetVelocity(0, 0);
 
         if (g_InputManager.GetTouchCount() > 0) {
 
             var touch = g_InputManager.GetTouch(0);
             var gamePoint = window.engine.Renderer.ScreenToGamePoint(touch.x, 1 - touch.y);
-            gamePoint.y += 108 / window.innerHeight * 64;
+            gamePoint.y += 64 / window.innerHeight * 64;
             var toPoint = gamePoint.sub(newObj.GetPosition());
             toPoint.clampLength(-1.5, 1.5);
             newObj.AddVelocity(toPoint.x, toPoint.y);
@@ -83,7 +56,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
 
         fireTimer += _fDT;
 
-        if (g_InputManager.IsKeyDown(90) || g_InputManager.GetTouchCount() > 0) {
+        if (g_InputManager.GetTouchCount() > 0) {
             if (fireTimer > 0.25) {
 
                 var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
@@ -145,9 +118,9 @@ window.engine.GameManager.AddObjectFunction("player", function(_gameObject, _d3O
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("p-bullet", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, 2);
@@ -165,9 +138,9 @@ window.engine.GameManager.AddObjectFunction("p-bullet", function(_gameObject, _d
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("p-counter-bullet", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("p-counter-bullet", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-counter-bullet"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-counter-bullet"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, 3);

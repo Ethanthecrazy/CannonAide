@@ -1,6 +1,6 @@
-window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("e-bullet", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("e-bullet"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("e-bullet"));
 
     newObj.m_3DObject.rotation.z = 3.14;
     newObj.m_nHealth = 1;
@@ -21,9 +21,9 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_gameObject, _d
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("sphere", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
 
     newObj.m_nHealth = 3;
     var fireTimer = 0;
@@ -75,9 +75,9 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_gameObject, _d3O
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("mega-sphere", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("mega-sphere", function(_d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("mega-sphere"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("mega-sphere"));
 
     var sphereCount = 3;
 

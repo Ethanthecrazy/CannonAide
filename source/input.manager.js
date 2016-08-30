@@ -2,6 +2,7 @@
 function InputManager() {
     this.m_currKeyStates = Array.apply(null, Array(256)).map(Boolean.prototype.valueOf, false);
     this.m_currTouches = [];
+    this.m_canvas = null;
 }
 
 InputManager.prototype.Init = function( _canvas ) {
@@ -18,6 +19,8 @@ InputManager.prototype.Init = function( _canvas ) {
     window.addEventListener("mousedown", this.onMouseDown.bind(this));
     window.addEventListener("mousemove", this.onMouseMove.bind(this));
     window.addEventListener("mouseup", this.onMouseUp.bind(this));
+    
+    this.m_canvas = _canvas;
 };
 
 //==============================================================================
@@ -37,29 +40,45 @@ InputManager.prototype.onKeyUp = function(e) {
 };
 
 //==============================================================================
+InputManager.prototype.PointInsideOfRect = function( _x, _y, _rect ) {
+    if( _x < _rect.right && _x> _rect.left 
+        && _y > _rect.top && _y < _rect.bottom ) {
+        return true;
+    }
+    
+    return false;
+};
+
+//==============================================================================
 InputManager.prototype.handleTouch = function(e) {
 
-
     e = e || window.event;
-    e.preventDefault();
-        
+    var rect = this.m_canvas.getBoundingClientRect();
+    
     this.m_currTouches = [];
         
     for (var i = 0; i < e.touches.length; ++i) {
         var currTouch = e.touches.item(i);
-        this.m_currTouches.push({
-            x: currTouch.clientX / window.innerWidth,
-            y: currTouch.clientY / window.innerHeight,
-            id: currTouch.identifier
-        });
+        
+        if( this.PointInsideOfRect( currTouch.clientX, currTouch.clientY, rect ) ) {
+            
+            e.preventDefault();
+            this.m_currTouches.push({
+                x: ( currTouch.clientX - rect.left ) / rect.width,
+                y: ( currTouch.clientY - rect.top ) / rect.height,
+                id: currTouch.identifier
+            });
+        }
     }
 };
 
 //==============================================================================
 InputManager.prototype.GenerateMouseTouch = function(e) {
     
-    var touchX = e.clientX / window.innerWidth;
-    var touchY = e.clientY / window.innerHeight;
+    var rect = this.m_canvas.getBoundingClientRect();
+
+    var touchX = ( e.clientX - rect.left ) / this.m_canvas.width;
+    var touchY = ( e.clientY - rect.top ) / this.m_canvas.height;
     
     if( touchX > 1 )
         touchX = 1;
@@ -80,26 +99,36 @@ InputManager.prototype.GenerateMouseTouch = function(e) {
 //==============================================================================
 InputManager.prototype.onMouseDown = function(e) {
     e = e || window.event;
-    e.preventDefault();
-
-    this.m_currTouches[0] = this.GenerateMouseTouch(e);
+    var rect = this.m_canvas.getBoundingClientRect();
+    
+    if( this.PointInsideOfRect( e.clientX, e.clientY, rect ) ) {
+        e.preventDefault();
+        this.m_currTouches[0] = this.GenerateMouseTouch(e);
+    }
 };
 
 //==============================================================================
 InputManager.prototype.onMouseMove = function(e) {
     e = e || window.event;
-    e.preventDefault();
-
-    if (this.m_currTouches[0]) {
-        this.m_currTouches[0] = this.GenerateMouseTouch(e);
+    var rect = this.m_canvas.getBoundingClientRect();
+    
+    if( this.PointInsideOfRect( e.clientX, e.clientY, rect ) ) {
+        e.preventDefault();
+        if (this.m_currTouches[0]) {
+            this.m_currTouches[0] = this.GenerateMouseTouch(e);
+        }
     }
 };
 
 //==============================================================================
 InputManager.prototype.onMouseUp = function(e) {
     e = e || window.event;
-    e.preventDefault();
-
+    var rect = this.m_canvas.getBoundingClientRect();
+    
+    if( this.PointInsideOfRect( e.clientX, e.clientY, rect ) ) {
+        e.preventDefault();
+    }
+    
     this.m_currTouches.splice(0, 1);
 };
 

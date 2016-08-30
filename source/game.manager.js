@@ -274,10 +274,11 @@ GameManager.prototype.SpawnObject = function(_name) {
     }
     else {
         console.warn("No object template found for '" + _name + "'.");
+        d3Object = window.engine.Renderer.CreateRenderObject([]);
     }
 
     if (this.m_CreateFunctions[_name]) {
-        gameObject = this.m_CreateFunctions[_name](null, d3Object);
+        gameObject = this.m_CreateFunctions[_name](d3Object);
         if (!gameObject) {
             console.error("Create function '" + _name + "' did not return an object.");
             return;

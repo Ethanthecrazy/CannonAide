@@ -41,10 +41,10 @@ function Renderer() {
 //==============================================================================
 Renderer.prototype.Init = function(canvas) {
 
-    var setWidth = window.innerWidth;
+    var setWidth = window.innerHeight * ( 9 / 16 );
     var setHeight = window.innerHeight;
 
-    var unitsWidth = 64 * (setWidth / setHeight);
+    var unitsWidth = 64 * (10 / 16);
     var unitsHeight = 64;
 
     this.m_3Camera = new THREE.OrthographicCamera(
@@ -69,16 +69,16 @@ Renderer.prototype.Init = function(canvas) {
     this.m_3Renderer.setClearColor(0x000000);
 
     window.onresize = function() {
-        this.onResize(window.innerWidth, window.innerHeight);
+        this.onResize(window.innerHeight * ( 10 / 16 ), window.innerHeight);
     }.bind(this);
 };
 
 //==============================================================================
 Renderer.prototype.onResize = function(_nWidth, _nHeight) {
 
-    var unitsWidth = 64 * (_nWidth / _nHeight);
+    var unitsWidth = 64 * (10 / 16);
     var unitsHeight = 64;
-
+    
     this.m_3Camera.left = unitsWidth / -2;
     this.m_3Camera.right = unitsWidth / 2;
     this.m_3Camera.top = unitsHeight / 2;
@@ -341,7 +341,7 @@ Renderer.prototype.CreateString = function( _text, _matName ) {
     
         var charMesh = new THREE.Mesh(charGeo, sourceMat.clone());
         newObject.add( charMesh );
-        charMesh.position.x = i * 0.6 - _text.length / 2 * 0.6;
+        charMesh.position.x = ( i + 1 ) * 0.6 - _text.length / 2 * 0.6;
     }
     
     this.m_3Scene.add(newObject);

@@ -4,6 +4,8 @@ var g_GameManager = window.engine.GameManager;
 var g_InputManager = window.engine.InputManager;
 var g_Player = null;
 var g_Scoreboard = null;
+var g_Score = 0;
+var g_WaveCount = 0;
 
 function AddTimeout(_gameObject, _time) {
 
@@ -55,7 +57,7 @@ function AddDestroyParticle(_gameObject, _matName, _count, _duration, _startScal
     });
 }
 
-window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("AideGame", function( _d3Object) {
 
     var newObj = new GameObject(null, []);
 
@@ -65,11 +67,16 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     g_GameManager.SpawnObject("top-barrier");
 
     g_Player = g_GameManager.SpawnObject("player");
+    
+    g_Score = 0;
+    g_WaveCount = 0;
     g_Scoreboard = g_GameManager.SpawnObject("scoreboard");
     
     newObj.AddUpdateCallback(function(_fDT) {
        
        if( newObj.m_gobChildren.length < 1 ) {
+            
+            window.engine.GameManager.SpawnObject("waveboard");
             
             var circleForm = g_GameManager.SpawnObject("form-circle");
             
@@ -98,9 +105,9 @@ window.engine.GameManager.AddObjectFunction("AideGame", function(_gameObject, _d
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("logo", function( _d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, []);
+    var newObj = new GameObject(_d3Object, []);
 
     g_GameManager.SpawnObject("note");
 
@@ -118,12 +125,12 @@ window.engine.GameManager.AddObjectFunction("logo", function(_gameObject, _d3Obj
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("note", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("note", function( _d3Object) {
 
     var textObj = window.engine.Renderer.CreateString( "Tap or click to start!", "mat_fixedsys" ); 
     _d3Object.add( textObj );
         
-    var newObj = _gameObject || new GameObject(_d3Object, []);
+    var newObj = new GameObject(_d3Object, []);
 
     _d3Object.scale.x = 2;
     _d3Object.scale.y = 2;
@@ -139,9 +146,73 @@ window.engine.GameManager.AddObjectFunction("note", function(_gameObject, _d3Obj
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("right-barrier", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction( "scoreboard", function( _d3Object ){
+    
+    var textObj = window.engine.Renderer.CreateString( "0", "mat_fixedsys" );
+    _d3Object.add( textObj );
+        
+    _d3Object.scale.x = 3;
+    _d3Object.scale.y = 3;
+    
+    _d3Object.position.z = 16;
+    
+    var newObj = new GameObject(_d3Object, []);
+    
+    newObj.SetPosition( 0, 32 - 1 - ( 3 / 2 ) );
+    
+    newObj.AddScore = function( _increase ) {
+        g_Score += _increase;
+        
+        // Cleanup old text
+        _d3Object.remove( textObj );
+        window.engine.Renderer.Remove3DObject( textObj );
+        
+        // Create new object
+        textObj = window.engine.Renderer.CreateString( g_Score.toString(), "mat_fixedsys" );
+        _d3Object.add( textObj );
+    };
+    
+    g_Scoreboard = newObj;
+    return newObj;
+});
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("right-barrier"));
+window.engine.GameManager.AddObjectFunction( "waveboard", function( _d3Object ){
+    
+    g_WaveCount += 1;
+    
+    var textObj = window.engine.Renderer.CreateString( "Wave " + g_WaveCount, "mat_fixedsys" ); 
+    _d3Object.add( textObj );
+        
+    var newObj = new GameObject(_d3Object, []);
+
+    _d3Object.scale.x = 5;
+    _d3Object.scale.y = 5;
+    _d3Object.position.z = 16;
+    
+    newObj.SetPosition( 0, 0 );
+    
+    var displayTimer = 0;
+    newObj.AddUpdateCallback(function(_fDT) {
+        displayTimer += _fDT;
+        var displayPercent = displayTimer / 2;
+        
+        _d3Object.scale.x = 5 - ( 2 * displayPercent );
+        _d3Object.scale.y = 5 - ( 2 * displayPercent );
+        
+        for( var i = 0; i < textObj.children.length; ++i ) {
+            textObj.children[i].material.opacity = 1 - displayPercent;
+        }
+    });
+    
+    AddTimeout( newObj, 2 );
+    
+    return newObj;
+});
+
+
+window.engine.GameManager.AddObjectFunction("right-barrier", function( _d3Object) {
+
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("right-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         var gamePoint = window.engine.Renderer.ScreenToGamePoint(1, 0.5);
@@ -155,9 +226,9 @@ window.engine.GameManager.AddObjectFunction("right-barrier", function(_gameObjec
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("left-barrier", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("left-barrier", function( _d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("left-barrier"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("left-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         var gamePoint = window.engine.Renderer.ScreenToGamePoint(0, 0.5);
@@ -171,9 +242,9 @@ window.engine.GameManager.AddObjectFunction("left-barrier", function(_gameObject
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("bottom-barrier", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("bottom-barrier", function( _d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("bottom-barrier"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("bottom-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 0);
@@ -193,9 +264,9 @@ window.engine.GameManager.AddObjectFunction("bottom-barrier", function(_gameObje
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject, _d3Object) {
+window.engine.GameManager.AddObjectFunction("top-barrier", function( _d3Object) {
 
-    var newObj = _gameObject || new GameObject(_d3Object, window.engine.GameManager.GetColliders("top-barrier"));
+    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("top-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 1);
@@ -214,40 +285,9 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function(_gameObject,
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction( "scoreboard", function( _gameObject, _d3Object ){
-    
-    var textObj = window.engine.Renderer.CreateString( "0", "mat_fixedsys" );
-    _d3Object.add( textObj );
-        
-    _d3Object.scale.x = 3;
-    _d3Object.scale.y = 3;
-    
-    _d3Object.position.z = 16;
-    
-    var score = 0;
-    var newObj = _gameObject || new GameObject(_d3Object, []);
-    
-    newObj.SetPosition( 0, 30 );
-    
-    newObj.AddScore = function( _increase ) {
-        score += _increase;
-        
-        // Cleanup old text
-        _d3Object.remove( textObj );
-        window.engine.Renderer.Remove3DObject( textObj );
-        
-        // Create new object
-        textObj = window.engine.Renderer.CreateString( score.toString(), "mat_fixedsys" );
-        _d3Object.add( textObj );
-    };
-    
-    g_Scoreboard = newObj;
-    return newObj;
-});
+window.engine.GameManager.AddObjectFunction("form-circle", function( _d3Object) {
 
-window.engine.GameManager.AddObjectFunction("form-circle", function(_gameObject, _d3Object) {
-
-    var newObj = _gameObject || new GameObject(_d3Object, null);
+    var newObj = new GameObject(_d3Object, null);
     var angle = 0;
     
     newObj.AddUpdateCallback(function(_fDT) {
