@@ -333,7 +333,7 @@ Renderer.prototype.CreateString = function( _text, _matName ) {
         
         var left = charColumn * texSpaceConst;
         var right = left + texSpaceConst;
-        var top = 1 - ( charRow * texSpaceConst );
+        var top = 0.99 - ( charRow * texSpaceConst );
         var bottom = 1 - ( charRow * texSpaceConst  + texSpaceConst );
         
         charGeo.faceVertexUvs[0][0] = [ new THREE.Vector2(left, bottom), new THREE.Vector2(right, top), new THREE.Vector2(left, top) ];

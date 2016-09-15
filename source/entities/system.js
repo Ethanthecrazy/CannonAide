@@ -111,8 +111,8 @@ window.engine.GameManager.AddObjectFunction("logo", function( _d3Object) {
 
     g_GameManager.SpawnObject("note");
 
-    _d3Object.scale.x = 89 / 2;
-    _d3Object.scale.y = 18 / 2;
+    _d3Object.scale.x = 64 / 2;
+    _d3Object.scale.y = 12 / 2;
     
     newObj.AddUpdateCallback(function(_fDT) {
 
