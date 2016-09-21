@@ -1,87 +1,38 @@
-/* global THREE */
+var THREE = require("../lib/three.js");
+var Renderer = require("../renderer.js").Instance();
+var InputManager = require("../input.manager.js").Instance();
+var GameManager = require("../game.manager.js").Instance();
 
-var g_GameManager = window.engine.GameManager;
-var g_InputManager = window.engine.InputManager;
-var g_Player = null;
-var g_Scoreboard = null;
+var GameObject = require("../gameobject.js");
+var Util = require("./util.js");
+
 var g_Score = 0;
 var g_WaveCount = 0;
 
-function AddTimeout(_gameObject, _time) {
-
-    var deathTimer = 0;
-    _gameObject.AddUpdateCallback(function(_fDT) {
-        deathTimer += _fDT;
-        if (deathTimer > _time)
-            g_GameManager.Destroy(_gameObject, true);
-    });
-}
-
-function AddScaleOverTime(_gameObject, _minScale, _maxScale, _duration) {
-
-    var scaleTimer = 0;
-    _gameObject.AddUpdateCallback(function(_fDT) {
-        scaleTimer += _fDT;
-        if (scaleTimer < _duration) {
-            var percent = THREE.Math.smoothstep(scaleTimer, 0, _duration);
-            var currScale = _minScale + percent * (_maxScale - _minScale);
-            _gameObject.m_3DObject.scale.x = currScale;
-            _gameObject.m_3DObject.scale.y = currScale;
-            _gameObject.m_3DObject.children[0].material.opacity = 1 - percent;
-        }
-    });
-}
-
-function AddDestroyParticle(_gameObject, _matName, _count, _duration, _startScale, _stopScale) {
-
-    _gameObject.AddDestroyCallback(function() {
-
-        var pos = _gameObject.GetPosition();
-        var radCount = 0;
-        for (var i = 0; i < _count; ++i) {
-
-            var objSprite = g_GameManager.SpawnObject(_matName, true);
-            objSprite.SetPosition(pos.x, pos.y);
-
-            radCount += THREE.Math.randFloat(0, 3.14 / 2);
-            var vecDir = new THREE.Vector3(1, 0, 0);
-            vecDir.applyAxisAngle(new THREE.Vector3(0, 0, 1), radCount);
-            vecDir.multiplyScalar(THREE.Math.randFloat(0.05, 0.25));
-
-            objSprite.m_3DObject.rotation.z = THREE.Math.randFloat(0, 3.14 * 2);
-
-            objSprite.SetVelocity(vecDir.x, vecDir.y);
-            AddTimeout(objSprite, _duration);
-            AddScaleOverTime(objSprite, _startScale, _stopScale, _duration);
-        }
-    });
-}
-
-window.engine.GameManager.AddObjectFunction("AideGame", function( _d3Object) {
+GameManager.AddObjectFunction("AideGame", function( _d3Object) {
 
     var newObj = new GameObject(null, []);
 
-    g_GameManager.SpawnObject("left-barrier");
-    g_GameManager.SpawnObject("right-barrier");
-    g_GameManager.SpawnObject("bottom-barrier");
-    g_GameManager.SpawnObject("top-barrier");
-
-    g_Player = g_GameManager.SpawnObject("player");
+    GameManager.SpawnObject("left-barrier");
+    GameManager.SpawnObject("right-barrier");
+    GameManager.SpawnObject("bottom-barrier");
+    GameManager.SpawnObject("top-barrier");
+    GameManager.SpawnObject("player");
     
     g_Score = 0;
     g_WaveCount = 0;
-    g_Scoreboard = g_GameManager.SpawnObject("scoreboard");
+    GameManager.SpawnObject("scoreboard");
     
     newObj.AddUpdateCallback(function(_fDT) {
        
        if( newObj.m_gobChildren.length < 1 ) {
             
-            window.engine.GameManager.SpawnObject("waveboard");
+            GameManager.SpawnObject("waveboard");
             
-            var circleForm = g_GameManager.SpawnObject("form-circle");
+            var circleForm = GameManager.SpawnObject("form-circle");
             
-            var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0);
-            var topRight = window.engine.Renderer.ScreenToGamePoint(1, 1);
+            var bottomLeft = Renderer.ScreenToGamePoint(0, 0);
+            var topRight = Renderer.ScreenToGamePoint(1, 1);
             if (bottomLeft && topRight) {
         
                 var vecLoc = new THREE.Vector3(topRight.length() + 8, 0, 0);
@@ -91,7 +42,7 @@ window.engine.GameManager.AddObjectFunction("AideGame", function( _d3Object) {
                     var angle = THREE.Math.randFloat(0, 3.14);
                     vecLoc.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
                     
-                    var newSphere = g_GameManager.SpawnObject("sphere");
+                    var newSphere = GameManager.SpawnObject("sphere");
                     newSphere.SetPosition(vecLoc.x, vecLoc.y);
                     circleForm.AddChild(newSphere);
                 }
@@ -105,29 +56,29 @@ window.engine.GameManager.AddObjectFunction("AideGame", function( _d3Object) {
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("logo", function( _d3Object) {
+GameManager.AddObjectFunction("logo", function( _d3Object) {
 
     var newObj = new GameObject(_d3Object, []);
 
-    g_GameManager.SpawnObject("note");
+    GameManager.SpawnObject("note");
 
     _d3Object.scale.x = 64 / 2;
     _d3Object.scale.y = 12 / 2;
     
     newObj.AddUpdateCallback(function(_fDT) {
 
-        if (g_InputManager.GetTouchCount() > 0) {
-            g_GameManager.DestroyAll();
-            g_GameManager.SpawnObject("AideGame");
+        if (InputManager.GetTouchCount() > 0) {
+            GameManager.DestroyAll();
+            GameManager.SpawnObject("AideGame");
         }
     });
     
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("note", function( _d3Object) {
+GameManager.AddObjectFunction("note", function( _d3Object) {
 
-    var textObj = window.engine.Renderer.CreateString( "Tap or click to start!", "mat_fixedsys" ); 
+    var textObj = Renderer.CreateString( "Tap or click to start!", "mat_fixedsys" ); 
     _d3Object.add( textObj );
         
     var newObj = new GameObject(_d3Object, []);
@@ -146,9 +97,9 @@ window.engine.GameManager.AddObjectFunction("note", function( _d3Object) {
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction( "scoreboard", function( _d3Object ){
+GameManager.AddObjectFunction( "scoreboard", function( _d3Object ){
     
-    var textObj = window.engine.Renderer.CreateString( "0", "mat_fixedsys" );
+    var textObj = Renderer.CreateString( "0", "mat_fixedsys" );
     _d3Object.add( textObj );
         
     _d3Object.scale.x = 3;
@@ -165,22 +116,21 @@ window.engine.GameManager.AddObjectFunction( "scoreboard", function( _d3Object )
         
         // Cleanup old text
         _d3Object.remove( textObj );
-        window.engine.Renderer.Remove3DObject( textObj );
+        Renderer.Remove3DObject( textObj );
         
         // Create new object
-        textObj = window.engine.Renderer.CreateString( g_Score.toString(), "mat_fixedsys" );
+        textObj = Renderer.CreateString( g_Score.toString(), "mat_fixedsys" );
         _d3Object.add( textObj );
     };
     
-    g_Scoreboard = newObj;
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction( "waveboard", function( _d3Object ){
+GameManager.AddObjectFunction( "waveboard", function( _d3Object ){
     
     g_WaveCount += 1;
     
-    var textObj = window.engine.Renderer.CreateString( "Wave " + g_WaveCount, "mat_fixedsys" ); 
+    var textObj = Renderer.CreateString( "Wave " + g_WaveCount, "mat_fixedsys" ); 
     _d3Object.add( textObj );
         
     var newObj = new GameObject(_d3Object, []);
@@ -204,18 +154,18 @@ window.engine.GameManager.AddObjectFunction( "waveboard", function( _d3Object ){
         }
     });
     
-    AddTimeout( newObj, 2 );
+    Util.AddTimeout( newObj, 2 );
     
     return newObj;
 });
 
 
-window.engine.GameManager.AddObjectFunction("right-barrier", function( _d3Object) {
+GameManager.AddObjectFunction("right-barrier", function( _d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("right-barrier"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("right-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
-        var gamePoint = window.engine.Renderer.ScreenToGamePoint(1, 0.5);
+        var gamePoint = Renderer.ScreenToGamePoint(1, 0.5);
         if (gamePoint) {
             newObj.SetPosition(gamePoint.x + 1, gamePoint.y);
             newObj.SetVelocity(0, 0);
@@ -226,12 +176,12 @@ window.engine.GameManager.AddObjectFunction("right-barrier", function( _d3Object
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("left-barrier", function( _d3Object) {
+GameManager.AddObjectFunction("left-barrier", function( _d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("left-barrier"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("left-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
-        var gamePoint = window.engine.Renderer.ScreenToGamePoint(0, 0.5);
+        var gamePoint = Renderer.ScreenToGamePoint(0, 0.5);
         if (gamePoint) {
             newObj.SetPosition(gamePoint.x - 1, gamePoint.y);
             newObj.SetVelocity(0, 0);
@@ -242,13 +192,13 @@ window.engine.GameManager.AddObjectFunction("left-barrier", function( _d3Object)
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("bottom-barrier", function( _d3Object) {
+GameManager.AddObjectFunction("bottom-barrier", function( _d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("bottom-barrier"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("bottom-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
-        var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 0);
-        var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 0);
+        var leftPoint = Renderer.ScreenToGamePoint(0, 0);
+        var rightPoint = Renderer.ScreenToGamePoint(1, 0);
         if (leftPoint && rightPoint) {
             var width = leftPoint.distanceTo(rightPoint);
 
@@ -264,13 +214,13 @@ window.engine.GameManager.AddObjectFunction("bottom-barrier", function( _d3Objec
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("top-barrier", function( _d3Object) {
+GameManager.AddObjectFunction("top-barrier", function( _d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("top-barrier"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("top-barrier"));
 
     newObj.AddUpdateCallback(function(_fDT) {
-        var leftPoint = window.engine.Renderer.ScreenToGamePoint(0, 1);
-        var rightPoint = window.engine.Renderer.ScreenToGamePoint(1, 1);
+        var leftPoint = Renderer.ScreenToGamePoint(0, 1);
+        var rightPoint = Renderer.ScreenToGamePoint(1, 1);
         if (leftPoint && rightPoint) {
             var width = leftPoint.distanceTo(rightPoint);
 
@@ -285,7 +235,7 @@ window.engine.GameManager.AddObjectFunction("top-barrier", function( _d3Object) 
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("form-circle", function( _d3Object) {
+GameManager.AddObjectFunction("form-circle", function( _d3Object) {
 
     var newObj = new GameObject(_d3Object, null);
     var angle = 0;
@@ -303,7 +253,7 @@ window.engine.GameManager.AddObjectFunction("form-circle", function( _d3Object) 
         }
         
         if( newObj.m_gobChildren.length < 1 ) {
-            g_GameManager.Destroy( newObj );
+            GameManager.Destroy( newObj );
         }
     });
 

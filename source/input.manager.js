@@ -5,6 +5,18 @@ function InputManager() {
     this.m_canvas = null;
 }
 
+//==============================================================================
+var g_InputManager = null;
+InputManager.Instance = function() {
+    
+    if( !g_InputManager ) {
+        g_InputManager = new InputManager();    
+    }
+    
+    return g_InputManager;
+};
+
+//==============================================================================
 InputManager.prototype.Init = function( _canvas ) {
         // Keyboard interface
     window.addEventListener("keydown", this.onKeyDown.bind(this));
@@ -166,7 +178,4 @@ InputManager.prototype.GetTouch = function(_idx) {
     return returnVal;
 };
 
-if (!window.engine)
-    window.engine = {};
-
-window.engine.InputManager = new InputManager();
+module.exports = InputManager;

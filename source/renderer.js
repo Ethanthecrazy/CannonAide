@@ -1,5 +1,9 @@
-/* global THREE */
+
 /* global $ */
+
+var THREE = require("./lib/three.js");
+var OBJLoader = require("./lib/OBJLoader.js");
+
 var loadTime = (new Date()).getTime();
 
 function Renderer() {
@@ -28,7 +32,7 @@ function Renderer() {
     this.m_3Scene.add(directionalLight);
 
     // Start up the geometry loader
-    this.m_3OBJLoader = new THREE.OBJLoader(this.m_3LoadManager);
+    this.m_3OBJLoader = new OBJLoader(this.m_3LoadManager);
     this.m_3Textureloader = new THREE.TextureLoader(this.m_3LoadManager);
     this.m_3AudioLoader = new THREE.AudioLoader(this.m_3LoadManager);
 
@@ -37,6 +41,17 @@ function Renderer() {
     this.m_3Materials = {};
     this.m_3RenderObjects = {};
 }
+
+//==============================================================================
+var g_Renderer = null;
+Renderer.Instance = function() {
+
+    if (!g_Renderer) {
+        g_Renderer = new Renderer();
+    }
+
+    return g_Renderer;
+};
 
 //==============================================================================
 Renderer.prototype.Init = function(canvas) {
@@ -377,7 +392,4 @@ Renderer.prototype.ScreenToGamePoint = function(_fScreenPosX, _fScreenPosY) {
         return null;
 };
 
-if (!window.engine)
-    window.engine = {};
-
-window.engine.Renderer = new Renderer();
+module.exports = Renderer;

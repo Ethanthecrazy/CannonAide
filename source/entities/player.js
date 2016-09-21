@@ -1,6 +1,14 @@
-window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
+var THREE = require("../lib/three.js");
+var Renderer = require("../renderer.js").Instance();
+var InputManager = require("../input.manager.js").Instance();
+var GameManager = require("../game.manager.js").Instance();
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("player"));
+var GameObject = require("../gameobject.js");
+var Util = require("./util.js");
+
+GameManager.AddObjectFunction("player", function(_d3Object) {
+
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("player"));
 
     newObj.m_nHealth = 3;
     var counterRecharge = 0;
@@ -33,10 +41,10 @@ window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
 
         newObj.SetVelocity(0, 0);
 
-        if (g_InputManager.GetTouchCount() > 0) {
+        if (InputManager.GetTouchCount() > 0) {
 
-            var touch = g_InputManager.GetTouch(0);
-            var gamePoint = window.engine.Renderer.ScreenToGamePoint(touch.x, 1 - touch.y);
+            var touch = InputManager.GetTouch(0);
+            var gamePoint = Renderer.ScreenToGamePoint(touch.x, 1 - touch.y);
             gamePoint.y += 64 / window.innerHeight * 64;
             var toPoint = gamePoint.sub(newObj.GetPosition());
             toPoint.clampLength(-1.5, 1.5);
@@ -56,10 +64,10 @@ window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
 
         fireTimer += _fDT;
 
-        if (g_InputManager.GetTouchCount() > 0) {
+        if (InputManager.GetTouchCount() > 0) {
             if (fireTimer > 0.25) {
 
-                var newBullet = window.engine.GameManager.SpawnObject("p-bullet");
+                var newBullet = GameManager.SpawnObject("p-bullet");
                 var sourcePos = newObj.GetPosition();
                 var sourceVel = newObj.GetVelocity();
                 newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 2 + sourceVel.y);
@@ -88,12 +96,12 @@ window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
         }
     });
 
-    AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
+    Util.AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
 
     newObj.AddDestroyCallback(function() {
         setTimeout(function() {
-            g_GameManager.DestroyAll();
-            g_GameManager.SpawnObject("logo");
+            GameManager.DestroyAll();
+            GameManager.SpawnObject("logo");
         }, 3000);
 
     });
@@ -101,7 +109,7 @@ window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
     var oldDamage = newObj.Damage.bind(newObj);
     newObj.Damage = function(_amount) {
         if (counterTimer <= 0.5) {
-            var newBullet = window.engine.GameManager.SpawnObject("p-counter-bullet");
+            var newBullet = GameManager.SpawnObject("p-counter-bullet");
             var sourcePos = newObj.GetPosition();
             var sourceVel = newObj.GetVelocity();
             newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
@@ -118,35 +126,35 @@ window.engine.GameManager.AddObjectFunction("player", function(_d3Object) {
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("p-bullet", function(_d3Object) {
+GameManager.AddObjectFunction("p-bullet", function(_d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-bullet"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("p-bullet"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, 2);
     });
 
-    AddTimeout(newObj, 2);
+    Util.AddTimeout(newObj, 2);
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.parent.Damage(1);
-        g_GameManager.Destroy(newObj);
+        GameManager.Destroy(newObj);
     });
 
-    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.5);
+    Util.AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.5);
 
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("p-counter-bullet", function(_d3Object) {
+GameManager.AddObjectFunction("p-counter-bullet", function(_d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("p-counter-bullet"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("p-counter-bullet"));
 
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.SetVelocity(0, 3);
     });
 
-    AddTimeout(newObj, 3);
+    Util.AddTimeout(newObj, 3);
 
     newObj.AddCollisionCallback(function(_otherObj) {
         if (newObj.damageAmount)

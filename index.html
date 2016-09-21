@@ -6,16 +6,8 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1" />
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="source/lib/three.js"></script>
   <script type="text/javascript" src="source/lib/stats.min.js"></script>
-  <script type="text/javascript" src="source/lib/OBJLoader.js"></script>
   <script type="text/javascript" src="source/lib/Array.Prototype.Find.js"></script>
-  <script type="text/javascript" src="source/renderer.js"></script>
-  <script type="text/javascript" src="source/input.manager.js"></script>
-  <script type="text/javascript" src="source/game.manager.js"></script>
-  <script type="text/javascript" src="source/entities/system.js"></script>
-  <script type="text/javascript" src="source/entities/player.js"></script>
-  <script type="text/javascript" src="source/entities/enemies.js"></script>
 </head>
 
 <body>
@@ -28,42 +20,11 @@
       </div>
     </canvas>
   </div>
+  <script type="text/javascript" src="bundle.js"></script>
   <script>
-    /* global Stats */
-    var stats = new Stats();
-    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(stats.dom);
-
-    var time = (new Date()).getTime();
+  
     var canvas = document.getElementById("viewport");
-    window.engine.InputManager.Init(canvas);
-
-    window.engine.Renderer.Init(canvas);
-    window.engine.Renderer.Load("resources/index.json?t=" + time);
-    window.engine.Renderer.onLoad = function() {
-
-      window.engine.GameManager.Load("resources/objects.json?t=" + time, "resources/collisions.json?t=" + time);
-      window.engine.GameManager.onload = function() {
-
-        document.getElementById("progContainer").style.display = "none";
-        window.engine.GameManager.Start();
-        window.engine.GameManager.SpawnObject("logo");
-
-        main();
-
-      };
-    };
-
-    function main() {
-
-      requestAnimationFrame(main);
-
-      stats.begin();
-      window.engine.GameManager.Update();
-      window.engine.Renderer.Render();
-      stats.end();
-    }
-
+    
     var offsetCounter = 40;
 
     var rect = canvas.getBoundingClientRect();

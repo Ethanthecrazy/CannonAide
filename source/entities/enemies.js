@@ -1,6 +1,12 @@
-window.engine.GameManager.AddObjectFunction("e-bullet", function(_d3Object) {
+var THREE = require("../lib/three.js");
+var GameManager = require("../game.manager.js").Instance();
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("e-bullet"));
+var GameObject = require("../gameobject.js");
+var Util = require("./util.js");
+
+GameManager.AddObjectFunction("e-bullet", function(_d3Object) {
+
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("e-bullet"));
 
     newObj.m_3DObject.rotation.z = 3.14;
     newObj.m_nHealth = 1;
@@ -9,21 +15,21 @@ window.engine.GameManager.AddObjectFunction("e-bullet", function(_d3Object) {
         newObj.SetVelocity(0, -1);
     });
 
-    AddTimeout(newObj, 4);
+    Util.AddTimeout(newObj, 4);
 
     newObj.AddCollisionCallback(function(_otherObj) {
         _otherObj.parent.Damage(1);
-        g_GameManager.Destroy(newObj);
+        GameManager.Destroy(newObj);
     });
 
-    AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.2);
+    Util.AddDestroyParticle(newObj, "part-spark", 16, 0.25, 0.6, 1.2);
 
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("sphere", function(_d3Object) {
+GameManager.AddObjectFunction("sphere", function(_d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("sphere"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("sphere"));
 
     newObj.m_nHealth = 3;
     var fireTimer = 0;
@@ -36,25 +42,25 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_d3Object) {
         fireTimer += _fDT;
         if (fireTimer > 3) {
 
-            var newBullet = window.engine.GameManager.SpawnObject("e-bullet");
+            var newBullet = GameManager.SpawnObject("e-bullet");
             var sourcePos = newObj.GetPosition();
             var sourceVel = newObj.GetVelocity();
             newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y - 0.5 + sourceVel.y);
             fireTimer = 0;
         }
 
-        if( newObj.m_3v2TargetPos ) {
-            
+        if (newObj.m_3v2TargetPos) {
+
             var toPoint = newObj.m_3v2TargetPos.clone().sub(newObj.GetPosition());
             toPoint.clampLength(0, 1);
-            toPoint.multiplyScalar( _fDT );
+            toPoint.multiplyScalar(_fDT);
             newObj.AddVelocity(toPoint.x, toPoint.y);
         }
 
         var vel = newObj.GetVelocity();
-        vel.multiplyScalar( 0.95 );
+        vel.multiplyScalar(0.95);
         newObj.SetVelocity(vel.x, vel.y);
-        
+
         if (newObj.m_timeSinceDamage < 0.1) {
             this.m_3DObject.children[0].material.color = new THREE.Color(2, 2, 2);
         }
@@ -64,20 +70,31 @@ window.engine.GameManager.AddObjectFunction("sphere", function(_d3Object) {
 
     });
 
-    newObj.AddDestroyCallback( function(){
-        if( g_Scoreboard ) {
-            g_Scoreboard.AddScore( 100 );
+    newObj.AddDestroyCallback(function() {
+
+        var scoreboard = GameManager.GetAllObjects(function(object) {
+            if (object.AddScore) {
+                return true;
+            }
+            else {
+                return false;
+            }
+            
+        })[0];
+
+        if (scoreboard) {
+            scoreboard.AddScore(100);
         }
     });
-    
-    AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
+
+    Util.AddDestroyParticle(newObj, "sprite-test", 16, 0.5, 1, 2);
 
     return newObj;
 });
 
-window.engine.GameManager.AddObjectFunction("mega-sphere", function(_d3Object) {
+GameManager.AddObjectFunction("mega-sphere", function(_d3Object) {
 
-    var newObj = new GameObject(_d3Object, window.engine.GameManager.GetColliders("mega-sphere"));
+    var newObj = new GameObject(_d3Object, GameManager.GetColliders("mega-sphere"));
 
     var sphereCount = 3;
 
@@ -100,8 +117,8 @@ window.engine.GameManager.AddObjectFunction("mega-sphere", function(_d3Object) {
     newObj.AddUpdateCallback(function(_fDT) {
         newObj.m_3DObject.rotation.z += _fDT;
 
-        var bottomLeft = window.engine.Renderer.ScreenToGamePoint(0, 0.1);
-        var topRight = window.engine.Renderer.ScreenToGamePoint(1, 0.9);
+        var bottomLeft = Renderer.ScreenToGamePoint(0, 0.1);
+        var topRight = Renderer.ScreenToGamePoint(1, 0.9);
         if (bottomLeft && topRight) {
 
             var objPos = newObj.GetPosition();
@@ -143,12 +160,12 @@ window.engine.GameManager.AddObjectFunction("mega-sphere", function(_d3Object) {
             var worldPos = newObj.m_3DObject.children[i].position.clone();
             newObj.m_3DObject.children[i].localToWorld(worldPos);
 
-            g_GameManager.SpawnObject("sphere").SetPosition(worldPos.x, worldPos.y);
+            GameManager.SpawnObject("sphere").SetPosition(worldPos.x, worldPos.y);
         }
 
     });
 
-    AddDestroyParticle(newObj, "sprite-test", 16, 0.66, 1, 2);
+    Util.AddDestroyParticle(newObj, "sprite-test", 16, 0.66, 1, 2);
 
     return newObj;
 

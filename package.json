@@ -1,0 +1,10 @@
+{
+  "name": "CannonAide",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "webpack --progress --colors"
+  },
+  "devDependencies": {
+    "webpack": "^1.13.2"
+  }
+}
