@@ -44,7 +44,6 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	window.engine = {};
 	var Renderer = __webpack_require__(1).Instance();
 	var InputManager = __webpack_require__(4).Instance();
 	var GameManager = __webpack_require__(5).Instance();
@@ -43908,7 +43907,7 @@
 	    var counterRecharge = 0;
 	    var counterTimer = 0;
 	    var counterAmount = 0;
-	    
+
 	    var fireTimer = 1;
 	    var entranceTimer = 0;
 	    var touchLastFrame = false;
@@ -43948,7 +43947,7 @@
 	        }
 	        else {
 
-	            if (counterRecharge > 5 && touchLastFrame == true) {
+	            if (counterRecharge > 5 && touchLastFrame === true) {
 	                counterRecharge = 0;
 	                counterTimer = 0;
 	            }
@@ -43974,6 +43973,16 @@
 
 	        counterTimer += _fDT;
 
+	        if (counterTimer > 1 && counterAmount > 0) {
+
+	            var newBullet = GameManager.SpawnObject("p-counter-bullet");
+	            var sourcePos = newObj.GetPosition();
+	            var sourceVel = newObj.GetVelocity();
+	            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
+	            newBullet.damageAmount = counterAmount * 3;
+	            counterAmount = 0;
+	        }
+
 	        if (newObj.m_timeSinceDamage < 0.25) {
 	            var vecLoc = new THREE.Vector3(0.3, 0, 0);
 	            var angle = THREE.Math.randFloat(0, 3.14 * 2);
@@ -43981,7 +43990,7 @@
 	            newObj.m_3DObject.position.x += vecLoc.x;
 	            newObj.m_3DObject.position.y += vecLoc.y;
 	        }
-	        
+
 	        if (newObj.m_timeSinceDamage < 0.1) {
 	            this.m_3DObject.children[0].material.color = new THREE.Color(2, 2, 2);
 	        }
@@ -44002,18 +44011,14 @@
 
 	    var oldDamage = newObj.Damage.bind(newObj);
 	    newObj.Damage = function(_amount) {
-	        if (counterTimer <= 0.5) {
-	            var newBullet = GameManager.SpawnObject("p-counter-bullet");
-	            var sourcePos = newObj.GetPosition();
-	            var sourceVel = newObj.GetVelocity();
-	            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
-	            newBullet.damageAmount = _amount * 3;
+	        if (counterTimer <= 1) {
+	            counterAmount += _amount;
 	        }
-	        else if( newObj.m_timeSinceDamage > 0.25 ){
+	        else if (newObj.m_timeSinceDamage > 0.25) {
 	            oldDamage(_amount);
 	        }
 	    };
-	    
+
 	    newObj.m_3DObject.children[1].position.z = 0.3;
 	    newObj.m_3DObject.children[2].position.z = 0.2;
 	    newObj.m_3DObject.children[3].position.z = 0.1;
