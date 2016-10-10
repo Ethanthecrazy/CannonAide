@@ -22,13 +22,17 @@ function GameObject(_3DObject, _colliderList) {
 }
 
 //==============================================================================
-GameObject.prototype.SetPosition = function(_x, _y) {
+GameObject.prototype.SetPosition = function(_x, _y, _z) {
 
     var vOffset = new THREE.Vector2();
     vOffset.subVectors(this.m_3vPrevPos, this.m_3vCurrPos);
 
-    this.m_3vCurrPos.set(_x, _y);
-    this.m_3vPrevPos.set(_x, _y);
+    if( _z == undefined ) {
+        _z = 0;
+    }
+
+    this.m_3vCurrPos.set(_x, _y, _z);
+    this.m_3vPrevPos.set(_x, _y, _z);
     
     if (this.m_3DObject) {
         this.m_3DObject.position.x = this.m_3vCurrPos.x;
@@ -49,7 +53,7 @@ GameObject.prototype.GetPosition = function() {
 
 //==============================================================================
 GameObject.prototype.SetVelocity = function(_x, _y) {
-    var vNewVel = new THREE.Vector2(-_x, -_y);
+    var vNewVel = new THREE.Vector3(-_x, -_y, 0);
     this.m_3vPrevPos.addVectors(this.m_3vCurrPos, vNewVel);
 };
 

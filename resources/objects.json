@@ -19,6 +19,11 @@
 				{ "layer": "p-bullet", "physics": true, "left": -0.5, "right": 0.5, "top": 0.5, "bottom": -1 }
 			]
 		},
+		"player-power": { 
+			"elements": [
+				{ "geo": "quad", "material": "mat_cube" }
+			]
+		},
 		"p-counter-bullet": {
 			"elements": [
 				{ "geo": "mesh_cube", "material": "mat_cube" }

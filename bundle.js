@@ -43444,13 +43444,17 @@
 	}
 
 	//==============================================================================
-	GameObject.prototype.SetPosition = function(_x, _y) {
+	GameObject.prototype.SetPosition = function(_x, _y, _z) {
 
 	    var vOffset = new THREE.Vector2();
 	    vOffset.subVectors(this.m_3vPrevPos, this.m_3vCurrPos);
 
-	    this.m_3vCurrPos.set(_x, _y);
-	    this.m_3vPrevPos.set(_x, _y);
+	    if( _z == undefined ) {
+	        _z = 0;
+	    }
+
+	    this.m_3vCurrPos.set(_x, _y, _z);
+	    this.m_3vPrevPos.set(_x, _y, _z);
 	    
 	    if (this.m_3DObject) {
 	        this.m_3DObject.position.x = this.m_3vCurrPos.x;
@@ -43471,7 +43475,7 @@
 
 	//==============================================================================
 	GameObject.prototype.SetVelocity = function(_x, _y) {
-	    var vNewVel = new THREE.Vector2(-_x, -_y);
+	    var vNewVel = new THREE.Vector3(-_x, -_y, 0);
 	    this.m_3vPrevPos.addVectors(this.m_3vCurrPos, vNewVel);
 	};
 
@@ -43631,8 +43635,9 @@
 
 	var map = {
 		"./enemies.js": 8,
-		"./player.js": 10,
-		"./system.js": 11,
+		"./player-power.js": 10,
+		"./player.js": 11,
+		"./system.js": 12,
 		"./util.js": 9
 	};
 	function webpackContext(req) {
@@ -43892,6 +43897,71 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var THREE = __webpack_require__(2);
+	var GameManager = __webpack_require__(5).Instance();
+	var GameObject = __webpack_require__(6);
+
+	GameManager.AddObjectFunction("player-power", function(_d3Object) {
+	    
+	    var newObj = new GameObject(_d3Object, null );
+	    
+	    var powerTimer = -1;
+	    var scale = 2;
+	    
+	    newObj.AddUpdateCallback(function(_fDT) {
+
+	        powerTimer += _fDT;
+
+	        if (powerTimer > 3) {
+	            GameManager.Destroy(newObj);
+	        }
+	        
+	        if(powerTimer < 1) {
+	            scale += _fDT * 4;
+	            
+	            if( scale > 16 ) {
+	                scale = 16;
+	            }
+	            
+	            _d3Object.scale.x = scale;
+	            _d3Object.scale.y = scale;
+	        }
+	        
+	        var projectiles = GameManager.GetAllObjects( function( _obj ) {
+	            
+	            for( var i = 0; i < _obj.GetColliderCount(); ++i ) {
+	                
+	                if( _obj.GetCollider( i ).layer == "e-bullet" ) {
+	                    
+	                    return true;
+	                }
+	            }
+	            
+	            return false;
+	        });
+	        
+	        
+	        projectiles.forEach( function(proj) {
+	            
+	            var toVec = proj.GetPosition().clone().sub( newObj.GetPosition() );
+	            var dist = toVec.length();
+	            if( dist <= scale / 2 ) {
+	                powerTimer = 0;
+	                GameManager.Destroy( proj );
+	            }
+	            
+	        });
+	        
+	    });
+
+	    return newObj;
+
+	});
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var THREE = __webpack_require__(2);
 	var Renderer = __webpack_require__(1).Instance();
 	var InputManager = __webpack_require__(4).Instance();
 	var GameManager = __webpack_require__(5).Instance();
@@ -43950,6 +44020,10 @@
 	            if (counterRecharge > 5 && touchLastFrame === true) {
 	                counterRecharge = 0;
 	                counterTimer = 0;
+	                
+	                var newBullet = GameManager.SpawnObject("player-power");
+	                var sourcePos = newObj.GetPosition();
+	                newBullet.SetPosition(sourcePos.x, sourcePos.y);
 	            }
 
 	            touchLastFrame = false;
@@ -43973,16 +44047,6 @@
 
 	        counterTimer += _fDT;
 
-	        if (counterTimer > 1 && counterAmount > 0) {
-
-	            var newBullet = GameManager.SpawnObject("p-counter-bullet");
-	            var sourcePos = newObj.GetPosition();
-	            var sourceVel = newObj.GetVelocity();
-	            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
-	            newBullet.damageAmount = counterAmount * 3;
-	            counterAmount = 0;
-	        }
-
 	        if (newObj.m_timeSinceDamage < 0.25) {
 	            var vecLoc = new THREE.Vector3(0.3, 0, 0);
 	            var angle = THREE.Math.randFloat(0, 3.14 * 2);
@@ -43998,7 +44062,7 @@
 	            this.m_3DObject.children[0].material.color = new THREE.Color(1, 1, 1);
 	        }
 	    });
-
+	 
 	    Util.AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
 
 	    newObj.AddDestroyCallback(function() {
@@ -44064,7 +44128,7 @@
 	});
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var THREE = __webpack_require__(2);

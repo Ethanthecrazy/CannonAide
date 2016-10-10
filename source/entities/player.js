@@ -57,6 +57,10 @@ GameManager.AddObjectFunction("player", function(_d3Object) {
             if (counterRecharge > 5 && touchLastFrame === true) {
                 counterRecharge = 0;
                 counterTimer = 0;
+                
+                var newBullet = GameManager.SpawnObject("player-power");
+                var sourcePos = newObj.GetPosition();
+                newBullet.SetPosition(sourcePos.x, sourcePos.y);
             }
 
             touchLastFrame = false;
@@ -80,16 +84,6 @@ GameManager.AddObjectFunction("player", function(_d3Object) {
 
         counterTimer += _fDT;
 
-        if (counterTimer > 1 && counterAmount > 0) {
-
-            var newBullet = GameManager.SpawnObject("p-counter-bullet");
-            var sourcePos = newObj.GetPosition();
-            var sourceVel = newObj.GetVelocity();
-            newBullet.SetPosition(sourcePos.x + sourceVel.x, sourcePos.y + 1 + sourceVel.y);
-            newBullet.damageAmount = counterAmount * 3;
-            counterAmount = 0;
-        }
-
         if (newObj.m_timeSinceDamage < 0.25) {
             var vecLoc = new THREE.Vector3(0.3, 0, 0);
             var angle = THREE.Math.randFloat(0, 3.14 * 2);
@@ -105,7 +99,7 @@ GameManager.AddObjectFunction("player", function(_d3Object) {
             this.m_3DObject.children[0].material.color = new THREE.Color(1, 1, 1);
         }
     });
-
+ 
     Util.AddDestroyParticle(newObj, "sprite-test", 32, 2, 1, 8);
 
     newObj.AddDestroyCallback(function() {
