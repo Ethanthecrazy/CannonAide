@@ -11,7 +11,7 @@ util.AddTimeout = function(_gameObject, _time) {
         if (deathTimer > _time)
             GameManager.Destroy(_gameObject, true);
     });
-}
+};
 
 util.AddScaleOverTime = function(_gameObject, _minScale, _maxScale, _duration) {
 
@@ -26,7 +26,7 @@ util.AddScaleOverTime = function(_gameObject, _minScale, _maxScale, _duration) {
             _gameObject.m_3DObject.children[0].material.opacity = 1 - percent;
         }
     });
-}
+};
 
 util.AddDestroyParticle = function(_gameObject, _matName, _count, _duration, _startScale, _stopScale) {
 
@@ -51,6 +51,6 @@ util.AddDestroyParticle = function(_gameObject, _matName, _count, _duration, _st
             util.AddScaleOverTime(objSprite, _startScale, _stopScale, _duration);
         }
     });
-}
+};
 
 module.exports = util;

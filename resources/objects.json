@@ -21,7 +21,7 @@
 		},
 		"player-power": { 
 			"elements": [
-				{ "geo": "quad", "material": "mat_cube" }
+				{ "geo": "quad", "material": "mat_p_shield" }
 			]
 		},
 		"p-counter-bullet": {

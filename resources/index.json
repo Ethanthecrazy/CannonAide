@@ -25,7 +25,8 @@
 		"mat_cube": {
 			"type": "MeshPhongMaterial",
 			"params": {
-				"map": "cubetex.png"
+				"map": "cubetex.png",
+				"transparent": true
 			}
 		},
 		"mat_sphere": {
@@ -84,6 +85,13 @@
 			"type": "MeshBasicMaterial",
 			"params": {
 				"map": "fixedsys.png",
+				"transparent": true
+			}
+		},
+		"mat_p_shield": {
+			"type": "MeshBasicMaterial",
+			"params": {
+				"map": "player/p-shield.png",
 				"transparent": true
 			}
 		}
