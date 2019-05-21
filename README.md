@@ -1,2 +1,2 @@
 # CannonAide
-http://ethanthecrazy.github.io/CannonAide/
+http://graftax.github.io/CannonAide/
